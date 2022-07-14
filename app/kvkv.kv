@@ -198,6 +198,15 @@ MDBoxLayout:
                 disabled:True
                 opacity:0
             
+            MDRectangleFlatButton:
+                id: stage_review
+                md_bg_color: app.theme_cls.primary_color
+                pos_hint: {"center_x": .92, "center_y": .85}
+                text: "apprentice"
+                disabled: True
+                opacity:0
+                on_release: app.stage_button()
+            
             MDCard:
                 id: mdcard_review_rad
                 padding:10
@@ -477,6 +486,14 @@ MDBoxLayout:
                 font_size: 80
                 on_text_validate: app.search(0)
             #------------------------------------------------------------------------------------
+            MDRectangleFlatButton:
+                id: stage_info
+                md_bg_color: app.theme_cls.primary_color
+                pos_hint: {"center_x": .92, "center_y": .1}
+                text: "apprentice"
+                disabled: True
+                opacity:0
+                on_release: app.stage_info_button()
             MDCard:
                 id:accordion_info
                 size_hint: None, None

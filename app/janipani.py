@@ -4,6 +4,7 @@ from wanikani import *
 import pickle, random
 
 def save():
+	# return
 	with open('DATA.pkl', 'wb') as outp:
 		pickle.dump(DATA, outp, pickle.HIGHEST_PROTOCOL)
 
@@ -14,9 +15,10 @@ def reset():
 	for i in range(60):
 		for j in DATA[i].values():
 			for k in j:
+				# k.previous_review-=3600*12
 				k.stage=-1
 	save()
-# reset()
+## reset()
 
 def list_reviews(DATA,lvl,reviews):
 	L=[]
@@ -91,6 +93,7 @@ class MainApp(MDApp):
 	Wrongs_count={}
 	infos=[]
 	refresh_shield=0
+	hye_info=None
 
 	def build(self):
 		self.theme_cls.theme_style = "Dark"
@@ -231,6 +234,8 @@ class MainApp(MDApp):
 		self.root.ids.meaning_reading.text=''
 		self.root.ids.input.helper_text=''
 		self.root.ids.input.error=False
+		self.root.ids.stage_review.opacity=0
+		self.root.ids.stage_review.disabled=True
 
 		self.root.ids.next_lesson_button_review.opacity=0
 		self.root.ids.next_lesson_button_review.disabled=True
@@ -255,6 +260,9 @@ class MainApp(MDApp):
 			self.root.ids.play_review_button.disabled=False
 			return
 
+		self.root.ids.stage_review.opacity=1
+		self.root.ids.stage_review.disabled=False
+
 		self.root.ids.refresh_button.disabled=False
 		self.root.ids.refresh_button.opacity=1
 		self.root.ids.input.opacity=1
@@ -264,6 +272,7 @@ class MainApp(MDApp):
 		
 		
 		self.hye_review=self.reviews_pack[0]#!!!
+		self.root.ids.stage_review.text=stage_to_str[self.hye_review.stage]
 		if (not self.hye_review.ind_meaning) and (not self.hye_review.ind_reading):
 			self.rand = random.randint(0,1)
 		elif self.hye_review.ind_meaning:
@@ -286,7 +295,7 @@ class MainApp(MDApp):
 	def press_input(self):
 		self.refresh_shield=0
 		# self.root.ids.input.helper_text=''
-		if 'REALLY?' in self.root.ids.input.text:
+		if 'NOOO! not' in self.root.ids.input.text:
 			self.root.ids.input.text=''
 			self.root.ids.input.error=False
 			self.press_review_cake()
@@ -444,6 +453,13 @@ class MainApp(MDApp):
 		self.root.ids.input.text=''
 		self.press_review_cake()
 	
+	def stage_button(self):
+		if self.root.ids.stage_review.text==stage_to_str[self.hye_review.stage]:
+			t=time.time()-self.hye_review.previous_review
+			self.root.ids.stage_review.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
+		else:
+			self.root.ids.stage_review.text=stage_to_str[self.hye_review.stage]
+	
 	#----------------------------------------------------------------------------------------------
 
 	def hide_everything_info(self):
@@ -456,6 +472,8 @@ class MainApp(MDApp):
 		self.root.ids.progress_under.text=''
 		self.root.ids.progress_bar.opacity=0
 		self.root.ids.mdcard_lesson_rad_info.opacity=0
+		self.root.ids.stage_info.opacity=0
+		self.root.ids.stage_info.disabled=True
 		
 		self.root.ids.info_next.opacity=0
 		self.root.ids.info_next.disabled=True
@@ -534,6 +552,12 @@ class MainApp(MDApp):
 		self.root.ids.next_lesson_info.text=""
 
 		hye=self.infos.pop(0)
+		self.hye_info=hye
+
+		self.root.ids.stage_info.opacity=1
+		self.root.ids.stage_info.disabled=False
+		self.root.ids.stage_info.text=stage_to_str[hye.stage] if hye.stage!=(-1) else 'not explored'
+
 		self.root.ids.mdcard_lesson_info.md_bg_color=colors[hye.type]
 
 		if hye.type=='rad':
@@ -589,6 +613,14 @@ class MainApp(MDApp):
 		if not self.infos:
 			return
 		self.search(1)
+
+	def stage_info_button(self):
+		loc = stage_to_str[self.hye_info.stage] if (self.hye_info.stage>=0) else 'not explored'
+		if self.root.ids.stage_info.text==loc:
+			t=time.time()-self.hye_info.previous_review
+			self.root.ids.stage_info.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
+		else:
+			self.root.ids.stage_info.text=loc
 
 
 		
