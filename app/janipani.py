@@ -557,7 +557,9 @@ class MainApp(MDApp):
 			try:
 				self.infos=[]
 				L=self.root.ids.search.text.lower().split(' ',1)
-				if L[0] not in ['rad','kan','voc']:
+				if L[0]=='lvl':
+					self.infos=[item for sublist in DATA[int(L[1])-1].values() for item in sublist]
+				elif L[0] not in ['rad','kan','voc']:
 					for i in range(60):
 						for hyes in DATA[i].values():
 							for hye in hyes:
