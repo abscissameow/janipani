@@ -39,32 +39,36 @@ def is_it(input, answers, indicator):
 				dicinp[i] = 1
 		for i in dictrue:
 			if i not in dicinp:
+				if i>='0' and i<='9':
+					return 10
 				mistakes+=dictrue[i]
 				continue
 			mistakes+=abs(dictrue[i]-dicinp[i])
 		return mistakes
-        
-	res=True
-	input_words=input.split(' ')
-	same_length=0
-	mistakes=0
+    
+	# res=True
+	# input_words=input.split(' ')
+	# same_length=0
+	# mistakes=0
 	for phrase in answers:
-		phrase_words=phrase.split(' ')
-		if len(input_words)!=len(phrase_words):
-			continue
-		else:
-			mistakes=0
-			same_length=1
-		for i in range(len(phrase_words)):
-			mistakes += compare(input_words[i],phrase_words[i])
-
-		if mistakes<=len(phrase_words):
+		if compare(input,phrase)<=(1 if len(phrase)<=4 else 2):
 			return True
+		# phrase_words=phrase.split(' ')
+		# if len(input_words)!=len(phrase_words):
+		# 	continue
+		# else:
+		# 	mistakes=0
+		# 	same_length=1
+		# for i in range(len(phrase_words)):
+		# 	mistakes += compare(input_words[i],phrase_words[i])
 
-	if mistakes>len(phrase_words):
-			return False
+		# if mistakes<=len(phrase_words):
+		# 	return True
+	return False
+	# if mistakes>len(phrase_words):
+	# 		return False
 
-	return (res if same_length else False)
+	# return (res if same_length else False)
 
 def list_reviews(DATA,lvl,reviews):
 	L=[]
@@ -104,11 +108,11 @@ def list_lessons(DATA,lvl):
 def Lvl():
 	lvl=1
 	for lv in range(59):
-		if sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan']) or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
+		if sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*0.9 or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
 			lvl+=1
 		else:
 			return lvl
-	if sum([1 if i.stage>4 else 0 for i in DATA[59]['kan']])==len(DATA[59]['kan']):
+	if sum([1 if i.stage>4 else 0 for i in DATA[59]['kan']])>=len(DATA[59]['kan'])*0.9:
 			return lvl+1
 	return lvl
 
@@ -136,7 +140,7 @@ class MainApp(MDApp):
 	lessons=[]
 	reviews=[]
 	reviews_pack=[]
-	pack_size=15
+	pack_size=10
 	hye_review=None
 	rand=None
 	Wrongs_count={}
@@ -366,8 +370,8 @@ class MainApp(MDApp):
 		else:
 			l=self.hye_review.reading
 		
-		text=convert_(self.root.ids.input.text.lower(), self.rand)
-		kat=convert_('*'+self.root.ids.input.text.lower(),self.rand)
+		text=convert_(self.root.ids.input.text.lower(), self.rand).strip()
+		kat=convert_('*'+self.root.ids.input.text.lower(),self.rand).strip()
 		if is_it(text, l, self.rand) or (kat in l):
 			exec('self.hye_review.ind_'+randdict[self.rand]+'=1')
 			
@@ -538,7 +542,7 @@ class MainApp(MDApp):
 		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
 		self.root.ids.progress_under.text='guru kanji '+str(loc)+'/'+str(len(DATA[self.lvl-1]['kan']))
-		self.root.ids.progress_bar.value=100*loc/len(DATA[self.lvl-1]['kan'])
+		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])*0.9)
 		self.root.ids.progress_bar.opacity=1
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
 		self.root.ids.search.hint_text="   search: 'rad/kan/voc meaning'"
@@ -559,6 +563,17 @@ class MainApp(MDApp):
 				L=self.root.ids.search.text.lower().split(' ',1)
 				if L[0]=='lvl':
 					self.infos=[item for sublist in DATA[int(L[1])-1].values() for item in sublist]
+				elif L[0]=='check' and len(L)>1:
+					maxl=int(L[1])
+					for i in range(self.lvl):
+						for hyes in DATA[i].values():
+							for k in hyes:
+								if len(self.infos)<maxl:
+									self.infos.append(k)
+								else:
+									for j in range(maxl):
+										if (k not in self.infos) and k.previous_review>self.infos[j].previous_review:
+											self.infos[j]=k
 				elif L[0] not in ['rad','kan','voc']:
 					for i in range(60):
 						for hyes in DATA[i].values():
@@ -569,12 +584,15 @@ class MainApp(MDApp):
 										break
 				else:
 					type,text = L
-					for i in range(60):
-						for hye in DATA[i][type]:
-							for meaning in (lambda x: [x] if type=='rad' else x)(hye.meaning):
-								if text in meaning:
-									self.infos.append(hye)
-									break
+					if text>='1' and text<='60':
+						self.infos=[i for i in DATA[int(text)-1][type]]
+					else:
+						for i in range(60):
+							for hye in DATA[i][type]:
+								for meaning in (lambda x: [x] if type=='rad' else x)(hye.meaning):
+									if text in meaning:
+										self.infos.append(hye)
+										break
 				if not self.infos:
 					self.root.ids.search.current_hint_text_color=(1,0.2,0.2,1)
 					self.root.ids.search.hint_text=f"   couldn't find relevant: '{self.root.ids.search.text}'"
@@ -665,12 +683,25 @@ class MainApp(MDApp):
 		self.search(1)
 
 	def stage_info_button(self):
-		loc = stage_to_str[self.hye_info.stage] if (self.hye_info.stage>=0) else 'not explored'
-		if self.root.ids.stage_info.text==loc:
-			t=time.time()-self.hye_info.previous_review
-			self.root.ids.stage_info.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
+		stage = stage_to_str[self.hye_info.stage] if (self.hye_info.stage>=0) else 'not explored'
+		if self.hye_info.stage==-1:
+			t=residual=0
 		else:
-			self.root.ids.stage_info.text=loc
+			t=self.hye_info.previous_review+Delay[self.hye_info.stage]*3600-time.time()
+			residual=str(round(t//(3600)))+'h '+ str(round((t-round(t//(3600))*3600)//60))+'m'
+		if self.root.ids.stage_info.text==stage:
+			if self.hye_info.stage==-1:
+				self.root.ids.stage_info.text='who knows'
+			else:
+				self.root.ids.stage_info.text=residual
+		elif self.root.ids.stage_info.text in [residual,'who knows']:
+			if self.hye_info.stage==-1:
+				self.root.ids.stage_info.text='not exists'
+			else:
+				t=time.time()-self.hye_info.previous_review
+				self.root.ids.stage_info.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
+		else:
+			self.root.ids.stage_info.text=stage
 
 
 		
