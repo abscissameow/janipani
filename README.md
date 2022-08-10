@@ -27,3 +27,4 @@ download janipani.app
     *you can check the stage of the hyerogliph in rectangular button, tap it to see the residual time to review, tap it again to see the time since last preview
 
 p.s. if u want to load existing progress from your DATA.pkl use fit.ipynb or load_progress.py
+p.p.s. for last updates just replace your /dist/janipani.app/Contents/Resources/janipani.py file with the "main file" janipani.py from github
