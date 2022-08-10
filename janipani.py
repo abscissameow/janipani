@@ -11,13 +11,13 @@ def save():
 with open('DATA.pkl', 'rb') as inp:
     DATA=pickle.load(inp)
 
-# def reset():
-# 	for i in range(60):
-# 		for j in DATA[i].values():
-# 			for k in j:
-# 				k.previous_review-=3600*24*60
-# 				k.stage=-1
-# 	save()
+def reset():
+	for i in range(60):
+		for j in DATA[i].values():
+			for k in j:
+				k.previous_review-=3600*24*60
+				k.stage=-1
+	save()
 # #reset()
 
 def is_it(input, answers, indicator):
@@ -48,10 +48,10 @@ def is_it(input, answers, indicator):
 			if i not in dictrue:
 				if i>='0' and i<='9':
 					return 10
-				mistakes+=dicinp[i]
+				mistakes+=dicinp[i]/2
 				continue
-			mistakes+=abs(dictrue[i]-dicinp[i])
-		return mistakes
+			mistakes+=abs(dictrue[i]-dicinp[i])/2
+		return int(mistakes)
     
 	# res=True
 	# input_words=input.split(' ')
@@ -183,7 +183,7 @@ class MainApp(MDApp):
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
 		self.root.ids.progress_bar.value=100*loc/len(DATA[self.lvl-1]['kan'])
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
-		self.root.ids.search.hint_text="   search: 'rad/kan/voc meaning'"
+		self.root.ids.search.hint_text="   the search"
 		self.root.ids.active_lessons.text = f'Active lessons: {len(list_lessons(DATA,self.lvl))}'
 		self.root.ids.active_reviews.text = f'Active reviews: {len(self.reviews)+len(list_reviews(DATA,self.lvl,self.reviews))}'
 		self.theme_cls.primary_palette = "DeepPurple"
@@ -552,7 +552,7 @@ class MainApp(MDApp):
 		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])*0.9)
 		self.root.ids.progress_bar.opacity=1
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
-		self.root.ids.search.hint_text="   search: 'rad/kan/voc meaning'"
+		self.root.ids.search.hint_text="   the search"
 		self.root.ids.search.text=''
 		self.root.ids.search.disabled=False
 		self.root.ids.search.opacity=1
