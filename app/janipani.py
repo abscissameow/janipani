@@ -44,6 +44,13 @@ def is_it(input, answers, indicator):
 				mistakes+=dictrue[i]
 				continue
 			mistakes+=abs(dictrue[i]-dicinp[i])
+		for i in dicinp:
+			if i not in dictrue:
+				if i>='0' and i<='9':
+					return 10
+				mistakes+=dicinp[i]
+				continue
+			mistakes+=abs(dictrue[i]-dicinp[i])
 		return mistakes
     
 	# res=True
@@ -51,7 +58,7 @@ def is_it(input, answers, indicator):
 	# same_length=0
 	# mistakes=0
 	for phrase in answers:
-		if compare(input,phrase)<=(1 if len(phrase)<=4 else 2):
+		if compare(input,phrase)<=(1 if len(phrase)<=5 else 2):
 			return True
 		# phrase_words=phrase.split(' ')
 		# if len(input_words)!=len(phrase_words):
@@ -561,7 +568,23 @@ class MainApp(MDApp):
 			try:
 				self.infos=[]
 				L=self.root.ids.search.text.lower().split(' ',1)
-				if L[0]=='lvl':
+				if L[0]=='_stage':
+					lvl,typ,h,to=L[1].split(' ')
+					for i in DATA[int(lvl)-1][typ]:
+						if h in i.meaning:
+							i.stage=int(to)
+							save()
+							self.root.ids.search.text+=' done'
+							return
+				elif L[0]=='_time':
+					lvl,typ,h=L[1].split(' ')
+					for i in DATA[int(lvl)-1][typ]:
+						if h in i.meaning:
+							i.previous_review=time.time()-1000*3600
+							save()
+							self.root.ids.search.text+=' done'
+							return
+				elif L[0]=='lvl':
 					self.infos=[item for sublist in DATA[int(L[1])-1].values() for item in sublist]
 				elif L[0]=='check' and len(L)>1:
 					maxl=int(L[1])
