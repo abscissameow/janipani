@@ -12,10 +12,10 @@ download janipani.app
 -----HOW TO USE:
 
 1) learn meanings and readings of hyerogliphs in LESSONS tab (press cake button if you done with one)
-2) make review of your learned hyerogliphes in REVIEWS:
-    *you can check the stage of the hyerogliph in rectangular button, tap it to see the time since last preview
-    *if you mad a mistake just click the textfield and ENTER
-    *if you want to recall the info about the hyerogliph tap the book button
+2) make review of your learned hyerogliphes in REVIEWS:\
+    *you can check the stage of the hyerogliph in rectangular button, tap it to see the time since last preview\
+    *if you mad a mistake just click the textfield and ENTER\
+    *if you want to recall the info about the hyerogliph tap the book button\
     *if you mad a typo then tap the shield button and try again
 3) you can check statistics in INFO tab, the search textfield can be used as follows:\
     a) '3 voc to remove' (aka 'lvl type meaning', where 1<lvl<60, type is one of rad/kan/voc, meaning is one of meanings of hyerogliph)\
