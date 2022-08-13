@@ -113,13 +113,14 @@ def list_lessons(DATA,lvl):
 	return L
 
 def Lvl():
+	mult=0.9
 	lvl=1
 	for lv in range(59):
-		if sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*0.9 or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
+		if (sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])) or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
 			lvl+=1
 		else:
 			return lvl
-	if sum([1 if i.stage>4 else 0 for i in DATA[59]['kan']])>=len(DATA[59]['kan'])*0.9:
+	if (sum([1 if i.stage>4 else 0 for i in DATA[59]['kan']])>=len(DATA[59]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])):
 			return lvl+1
 	return lvl
 
@@ -544,12 +545,13 @@ class MainApp(MDApp):
 		self.root.ids.mdcard_lesson_info.opacity=0
 	
 	def press_lesson_cake_info(self):
+		mult=0.9
 		self.hide_everything_info()
 		self.root.ids.progress.opacity=1
 		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
 		self.root.ids.progress_under.text='guru kanji '+str(loc)+'/'+str(len(DATA[self.lvl-1]['kan']))
-		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])*0.9)
+		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])*mult)
 		self.root.ids.progress_bar.opacity=1
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
 		self.root.ids.search.hint_text="   the search"
@@ -568,7 +570,19 @@ class MainApp(MDApp):
 			try:
 				self.infos=[]
 				L=self.root.ids.search.text.lower().split(' ',1)
-				if L[0]=='_stage':
+				if L[0]=='_spread':
+					t=time.time()
+					delta=int(L[1])
+					for i in range(self.lvl):
+						for j in DATA[i].values():
+							for h in j:
+								r=random.randint(0,delta)
+								if t-h.previous_review>=r*3600:
+									h.previous_review+=r*3600
+					save()
+					self.root.ids.search.text+=' done'
+					return
+				elif L[0]=='_stage':
 					lvl,typ,h,to=L[1].split(' ')
 					for i in DATA[int(lvl)-1][typ]:
 						if h in i.meaning:
