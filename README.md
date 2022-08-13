@@ -27,4 +27,4 @@ download janipani.app
     *you can check the stage of the hyerogliph in rectangular button, tap it to see the residual time to review, tap it again to see the time since last preview\
     _g) '_spread 10' (aka 'spread n' to increase time of last review for each hyerogliph for random value of hours between 0 and n)
 
-p.s. for last updates just replace your janipani.app/Contents/Resources/janipani.py and janipani.app/Contents/Resources/kvkv.kv files with the janipani.py and kvkv.kv from github bramch 'janipani'
+p.s. for last updates just replace your janipani.app/Contents/Resources/janipani.py and janipani.app/Contents/Resources/kvkv.kv files with the janipani.py and kvkv.kv from github
