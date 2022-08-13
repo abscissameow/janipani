@@ -25,6 +25,7 @@ download janipani.app
     _e) '_stage 3 voc end 4' (aka '_stage lvl type meaning stage' to adjust hye's stage to preferred one)\
     _f) '_time 3 voc to be born' (aka '_time lvl type meaning' to decrease last review time by 1000 hours)\
     *you can check the stage of the hyerogliph in rectangular button, tap it to see the residual time to review, tap it again to see the time since last preview
+    _g) '_spread 10' (aka 'spread n' to increase time of last review for each hyerogliph for random value of hours between 0 and n)
 
 p.s. if u want to load existing progress from your DATA.pkl use fit.ipynb or load_progress.py\
 p.p.s. for last updates just replace your janipani.app/Contents/Resources/janipani.py file with the "this is the main file" janipani.py from github
