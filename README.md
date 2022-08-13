@@ -28,4 +28,4 @@ download janipani.app
     _g) '_spread 10' (aka 'spread n' to increase time of last review for each hyerogliph for random value of hours between 0 and n)
 
 p.s. if u want to load existing progress from your DATA.pkl use fit.ipynb or load_progress.py\
-p.p.s. for last updates just replace your janipani.app/Contents/Resources/janipani.py file with the "this is the main file" janipani.py from github
+p.p.s. for last updates just replace your janipani.app/Contents/Resources/janipani.py file with the janipani.py from github
