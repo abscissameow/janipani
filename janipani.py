@@ -407,10 +407,12 @@ class MainApp(MDApp):
 			
 			if convert_(self.root.ids.input.text.lower(), self.rand) in m:
 				self.root.ids.meaning_reading.text = f"oops! I am looking for {self.hye_review.main_reading}'yomi reading!"
+				self.root.ids.input.text=''
 				return
 			
 			if (self.root.ids.input.text.lower() in n) or (convert_(self.root.ids.input.text.lower(),not self.rand) in n):
 				self.root.ids.meaning_reading.text = f"oops! I am looking for {randdict[self.rand].capitalize()}!"
+				self.root.ids.input.text=''
 				return
 			self.root.ids.input.error_color= (1, 0, 0, 1)
 			self.root.ids.refresh_button.icon='shield-refresh'
@@ -609,7 +611,8 @@ class MainApp(MDApp):
 									self.infos.append(k)
 								else:
 									for j in range(maxl):
-										if (k not in self.infos) and k.previous_review>self.infos[j].previous_review:
+										better = k.previous_review + Delay[k.stage]*3600 < self.infos[j].previous_review + Delay[self.infos[j].stage]*3600
+										if (k not in self.infos) and better:
 											self.infos[j]=k
 				elif L[0] not in ['rad','kan','voc']:
 					for i in range(60):
