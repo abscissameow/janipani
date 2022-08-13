@@ -190,6 +190,7 @@ class MainApp(MDApp):
 		self.theme_cls.primary_hue='500'
 	def press_info_tab(self):
 		self.root.ids.forecast.text = forecast(self.lvl)
+		# self.root.ids.forecast.md_bg_color=self.theme_cls.primary_color
 		self.root.ids.Apprentice.text,self.root.ids.Guru.text,self.root.ids.Master.text,self.root.ids.Enlightened.text,self.root.ids.Burned.text=count_stages(self.lvl)
 		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
