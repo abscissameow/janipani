@@ -367,6 +367,14 @@ MDBoxLayout:
             text: "info"
             icon: 'calendar-star'
             on_tab_press: app.press_info_tab()
+            MDRectangleFlatButton:
+                id: forecast
+                md_bg_color: app.theme_cls.primary_color
+                pos_hint: {"center_x": .88, "center_y": .8}
+                text: "next review in 0h 0m"
+                # disabled: True
+                # opacity:1
+                # on_release: app.stage_info_button()
             MDCard:
                 id: Stages
                 size_hint: None, None
@@ -477,7 +485,7 @@ MDBoxLayout:
                     halign: 'center'
             MDTextField:
                 id: search
-                hint_text: "   search: 'rad/kan/voc meaning'"
+                hint_text: "   the search"
                 current_hint_text_color:app.theme_cls.primary_color
                 line_color_normal: 1, 1, 1, 1
                 text_color: 1, 1, 1, 1

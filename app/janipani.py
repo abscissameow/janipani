@@ -11,14 +11,24 @@ def save():
 with open('DATA.pkl', 'rb') as inp:
     DATA=pickle.load(inp)
 
-# def reset():
-# 	for i in range(60):
-# 		for j in DATA[i].values():
-# 			for k in j:
-# 				k.previous_review-=3600*24*60
-# 				k.stage=-1
-# 	save()
+def reset():
+	for i in range(60):
+		for j in DATA[i].values():
+			for k in j:
+				k.previous_review-=3600*24*60
+				k.stage=-1
+	save()
 # #reset()
+
+def forecast(lvl):
+	latest=DATA[0]['rad'][0].previous_review + Delay[DATA[0]['rad'][0].stage]*3600
+	for i in range(lvl):
+		for hyes in DATA[i].values():
+			for k in hyes:
+				if k.previous_review + Delay[k.stage]*3600 < latest:
+					latest = k.previous_review + Delay[k.stage]*3600
+	latest = max(0,(latest-time.time())//60)
+	return f"next review in {int(latest//60)}h {int(latest%60)}m"
 
 def is_it(input, answers, indicator):
 	if indicator:
@@ -48,10 +58,10 @@ def is_it(input, answers, indicator):
 			if i not in dictrue:
 				if i>='0' and i<='9':
 					return 10
-				mistakes+=dicinp[i]
+				mistakes+=dicinp[i]/2
 				continue
-			mistakes+=abs(dictrue[i]-dicinp[i])
-		return mistakes
+			mistakes+=abs(dictrue[i]-dicinp[i])/2
+		return int(mistakes)
     
 	# res=True
 	# input_words=input.split(' ')
@@ -113,13 +123,14 @@ def list_lessons(DATA,lvl):
 	return L
 
 def Lvl():
+	mult=0.9
 	lvl=1
 	for lv in range(59):
-		if sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*0.9 or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
+		if (sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])) or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
 			lvl+=1
 		else:
 			return lvl
-	if sum([1 if i.stage>4 else 0 for i in DATA[59]['kan']])>=len(DATA[59]['kan'])*0.9:
+	if (sum([1 if i.stage>4 else 0 for i in DATA[59]['kan']])>=len(DATA[59]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])):
 			return lvl+1
 	return lvl
 
@@ -178,12 +189,13 @@ class MainApp(MDApp):
 		self.theme_cls.primary_palette = "Cyan"
 		self.theme_cls.primary_hue='500'
 	def press_info_tab(self):
+		self.root.ids.forecast.text = forecast(self.lvl)
 		self.root.ids.Apprentice.text,self.root.ids.Guru.text,self.root.ids.Master.text,self.root.ids.Enlightened.text,self.root.ids.Burned.text=count_stages(self.lvl)
 		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
 		self.root.ids.progress_bar.value=100*loc/len(DATA[self.lvl-1]['kan'])
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
-		self.root.ids.search.hint_text="   search: 'rad/kan/voc meaning'"
+		self.root.ids.search.hint_text="   the search"
 		self.root.ids.active_lessons.text = f'Active lessons: {len(list_lessons(DATA,self.lvl))}'
 		self.root.ids.active_reviews.text = f'Active reviews: {len(self.reviews)+len(list_reviews(DATA,self.lvl,self.reviews))}'
 		self.theme_cls.primary_palette = "DeepPurple"
@@ -406,10 +418,12 @@ class MainApp(MDApp):
 			
 			if convert_(self.root.ids.input.text.lower(), self.rand) in m:
 				self.root.ids.meaning_reading.text = f"oops! I am looking for {self.hye_review.main_reading}'yomi reading!"
+				self.root.ids.input.text=''
 				return
 			
 			if (self.root.ids.input.text.lower() in n) or (convert_(self.root.ids.input.text.lower(),not self.rand) in n):
 				self.root.ids.meaning_reading.text = f"oops! I am looking for {randdict[self.rand].capitalize()}!"
+				self.root.ids.input.text=''
 				return
 			self.root.ids.input.error_color= (1, 0, 0, 1)
 			self.root.ids.refresh_button.icon='shield-refresh'
@@ -522,6 +536,7 @@ class MainApp(MDApp):
 	#----------------------------------------------------------------------------------------------
 
 	def hide_everything_info(self):
+		self.root.ids.forecast.opacity=0
 		self.root.ids.progress.opacity=0
 		self.root.ids.Stages.opacity=0
 		self.root.ids.search.disabled=True
@@ -544,15 +559,18 @@ class MainApp(MDApp):
 		self.root.ids.mdcard_lesson_info.opacity=0
 	
 	def press_lesson_cake_info(self):
+		mult=0.9
 		self.hide_everything_info()
+		self.root.ids.forecast.opacity=1
+		self.root.ids.forecast.text = forecast(self.lvl)
 		self.root.ids.progress.opacity=1
 		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
 		self.root.ids.progress_under.text='guru kanji '+str(loc)+'/'+str(len(DATA[self.lvl-1]['kan']))
-		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])*0.9)
+		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])*mult)
 		self.root.ids.progress_bar.opacity=1
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
-		self.root.ids.search.hint_text="   search: 'rad/kan/voc meaning'"
+		self.root.ids.search.hint_text="   the search"
 		self.root.ids.search.text=''
 		self.root.ids.search.disabled=False
 		self.root.ids.search.opacity=1
@@ -568,7 +586,19 @@ class MainApp(MDApp):
 			try:
 				self.infos=[]
 				L=self.root.ids.search.text.lower().split(' ',1)
-				if L[0]=='_stage':
+				if L[0]=='_spread':
+					t=time.time()
+					delta=int(L[1])
+					for i in range(self.lvl):
+						for j in DATA[i].values():
+							for h in j:
+								r=random.randint(0,delta)
+								if t-h.previous_review>=r*3600:
+									h.previous_review+=r*3600
+					save()
+					self.root.ids.search.text+=' done'
+					return
+				elif L[0]=='_stage':
 					lvl,typ,h,to=L[1].split(' ')
 					for i in DATA[int(lvl)-1][typ]:
 						if h in i.meaning:
@@ -595,7 +625,8 @@ class MainApp(MDApp):
 									self.infos.append(k)
 								else:
 									for j in range(maxl):
-										if (k not in self.infos) and k.previous_review>self.infos[j].previous_review:
+										better = k.previous_review + Delay[k.stage]*3600 < self.infos[j].previous_review + Delay[self.infos[j].stage]*3600
+										if (k not in self.infos) and better:
 											self.infos[j]=k
 				elif L[0] not in ['rad','kan','voc']:
 					for i in range(60):
@@ -632,6 +663,7 @@ class MainApp(MDApp):
 				return
 		
 		self.hide_everything_info()
+		
 		self.root.ids.info_next.opacity=1
 		self.root.ids.info_next.disabled=False
 		self.root.ids.info_mdcard_info.opacity=1

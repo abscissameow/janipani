@@ -20,6 +20,16 @@ def reset():
 	save()
 # #reset()
 
+def forecast(lvl):
+	latest=DATA[0]['rad'][0].previous_review + Delay[DATA[0]['rad'][0].stage]*3600
+	for i in range(lvl):
+		for hyes in DATA[i].values():
+			for k in hyes:
+				if k.previous_review + Delay[k.stage]*3600 < latest:
+					latest = k.previous_review + Delay[k.stage]*3600
+	latest = max(0,(latest-time.time())//60)
+	return f"next review in {int(latest//60)}h {int(latest%60)}m"
+
 def is_it(input, answers, indicator):
 	if indicator:
 		return input in answers
@@ -179,6 +189,7 @@ class MainApp(MDApp):
 		self.theme_cls.primary_palette = "Cyan"
 		self.theme_cls.primary_hue='500'
 	def press_info_tab(self):
+		self.root.ids.forecast.text = forecast(self.lvl)
 		self.root.ids.Apprentice.text,self.root.ids.Guru.text,self.root.ids.Master.text,self.root.ids.Enlightened.text,self.root.ids.Burned.text=count_stages(self.lvl)
 		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
@@ -525,6 +536,7 @@ class MainApp(MDApp):
 	#----------------------------------------------------------------------------------------------
 
 	def hide_everything_info(self):
+		self.root.ids.forecast.opacity=0
 		self.root.ids.progress.opacity=0
 		self.root.ids.Stages.opacity=0
 		self.root.ids.search.disabled=True
@@ -549,6 +561,8 @@ class MainApp(MDApp):
 	def press_lesson_cake_info(self):
 		mult=0.9
 		self.hide_everything_info()
+		self.root.ids.forecast.opacity=1
+		self.root.ids.forecast.text = forecast(self.lvl)
 		self.root.ids.progress.opacity=1
 		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
@@ -649,6 +663,7 @@ class MainApp(MDApp):
 				return
 		
 		self.hide_everything_info()
+		
 		self.root.ids.info_next.opacity=1
 		self.root.ids.info_next.disabled=False
 		self.root.ids.info_mdcard_info.opacity=1
