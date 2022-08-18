@@ -110,13 +110,14 @@ def list_lessons(DATA,lvl):
 		if radical.stage==-1:
 			L.append(radical)
 	if not L:
-		voc_check=1
+		mult=0.9
+		kan3=0
 		for kanji in DATA[lvl-1]['kan']:
-			if kanji.stage<3:
-				voc_check=0
-				if kanji.stage==-1:
-					L.append(kanji)
-	if voc_check:
+			if kanji.stage==-1:
+				L.append(kanji)
+			elif kanji.stage>=3:
+				kan3+=1
+	if kan3>=len(DATA[lvl-1]['kan'])*mult:
 		for vocab in DATA[lvl-1]['voc']:
 			if vocab.stage==-1:
 				L.append(vocab)
@@ -126,7 +127,8 @@ def Lvl():
 	mult=0.9
 	lvl=1
 	for lv in range(59):
-		if (sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])) or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
+		if (sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])) and \
+			(sum([1 if i.stage>0 else 0 for i in DATA[lv]['voc']])==len(DATA[lv]['voc'])) or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
 			lvl+=1
 		else:
 			return lvl
@@ -180,12 +182,12 @@ class MainApp(MDApp):
 
 	def press_lesson_tab(self):
 		if not self.lessons:
-			self.root.ids.play_lesson.text=f'{len(list_lessons(DATA,self.lvl))} CAKES!'
+			self.root.ids.play_lesson.text="LET'S CAKE!"
 		self.theme_cls.primary_palette = "Pink"
 		self.theme_cls.primary_hue='200'
 	def press_review_tab(self):
 		if not self.reviews:
-			self.root.ids.play_review.text=f'{len(list_reviews(DATA,self.lvl,self.reviews))+len(self.reviews)} CAKES!' 
+			self.root.ids.play_review.text="LET'S CAKE!"
 		self.theme_cls.primary_palette = "Cyan"
 		self.theme_cls.primary_hue='500'
 	def press_info_tab(self):
@@ -203,6 +205,7 @@ class MainApp(MDApp):
 		self.theme_cls.primary_hue='300'
 	
 	def hide_everything_lesson(self):
+		self.root.ids.play_lesson.opacity=0
 		self.root.ids.play_lesson.text=''
 		self.root.ids.next_lesson_button.opacity=0
 		self.root.ids.next_lesson_button.disabled=True
@@ -217,7 +220,8 @@ class MainApp(MDApp):
 		self.lessons=list_lessons(DATA,self.lvl)
 		if not self.lessons:
 			self.hide_everything_lesson()
-			self.root.ids.play_lesson.text='SORRY NO CAKES!'
+			self.root.ids.play_lesson.opacity=1
+			self.root.ids.play_lesson.text='NO CAKES!'
 			self.root.ids.play_lesson_button.opacity=1
 			self.root.ids.play_lesson_button.disabled=False
 			return
@@ -242,8 +246,8 @@ class MainApp(MDApp):
 			self.root.ids.on_reading.text=''
 			self.root.ids.mnemonics_meaning.text=hye.mnemonics
 			self.root.ids.mnemonics_meaning_ru.text=hye.mnemonics_ru
-			self.root.ids.mnemonics_reading.text="YOU MUST LISTEN TO ME, THIS IS VERY IMPORTANT!"
-			self.root.ids.mnemonics_reading_ru.text="THE MOST IMPORTANT THING YOU MUST DO IS ..."
+			self.root.ids.mnemonics_reading.text=""
+			self.root.ids.mnemonics_reading_ru.text=""
 			if not hye.hyerogliph:
 				self.root.ids.mdcard_lesson.opacity=0
 				self.root.ids.rad_pic_lesson.source=hye.pic_path
@@ -328,7 +332,7 @@ class MainApp(MDApp):
 		self.hide_everything_review()
 		
 		if not self.reviews:
-			self.root.ids.play_review.text='SORRY NO CAKES!'
+			self.root.ids.play_review.text='NO CAKES!'
 			self.root.ids.play_review_button.opacity=1
 			self.root.ids.play_review_button.disabled=False
 			return
@@ -394,7 +398,7 @@ class MainApp(MDApp):
 		kat=convert_('*'+self.root.ids.input.text.lower(),self.rand).strip()
 		if is_it(text, l, self.rand) or (kat in l):
 			exec('self.hye_review.ind_'+randdict[self.rand]+'=1')
-			
+			mult=0.9
 			if self.hye_review.ind_meaning and self.hye_review.ind_reading:
 				assert(time.time()-self.hye_review.previous_review >= Delay[self.hye_review.stage]*3600)
 				self.hye_review.previous_review=time.time()
@@ -406,7 +410,8 @@ class MainApp(MDApp):
 					self.hye_review.stage=int(max(self.hye_review.stage-(math.ceil(self.Wrongs_count[self.hye_review]/2) * (1 if self.hye_review.stage<5 else 2)),1))
 				save()
 				self.Wrongs_count.pop(self.hye_review, None)
-			if sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])==len(DATA[self.lvl-1]['kan']):
+			if (sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])>=len(DATA[self.lvl-1]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[self.lvl-1]['kan']])==len(DATA[self.lvl-1]['kan'])) and \
+				(sum([1 if i.stage>0 else 0 for i in DATA[self.lvl-1]['voc']])==len(DATA[self.lvl-1]['voc'])):
 				self.lvl+=1
 			save()
 		else:
@@ -443,7 +448,7 @@ class MainApp(MDApp):
 			if self.hye_review not in self.Wrongs_count:
 				return
 			self.refresh_shield=1
-			self.root.ids.input.helper_text='sumimasen!<3'
+			self.root.ids.input.helper_text='i mean ok but its like you know'
 			self.root.ids.input.error_color= (0, 1, 0, 1)
 			self.root.ids.input.text=''
 			self.root.ids.refresh_button.icon='refresh'
@@ -480,8 +485,8 @@ class MainApp(MDApp):
 			self.root.ids.on_reading_review.text=''
 			self.root.ids.mnemonics_meaning_review.text=hye.mnemonics
 			self.root.ids.mnemonics_meaning_ru_review.text=hye.mnemonics_ru
-			self.root.ids.mnemonics_reading_review.text="YOU MUST LISTEN TO ME, THIS IS VERY IMPORTANT!"
-			self.root.ids.mnemonics_reading_ru_review.text="THE MOST IMPORTANT THING YOU MUST DO IS ..."
+			self.root.ids.mnemonics_reading_review.text=""
+			self.root.ids.mnemonics_reading_ru_review.text=""
 			if not hye.hyerogliph:
 				self.root.ids.mdcard_lesson_review.opacity=0
 				self.root.ids.rad_pic_lesson_review.source=hye.pic_path
@@ -690,8 +695,8 @@ class MainApp(MDApp):
 			self.root.ids.on_reading_info.text=''
 			self.root.ids.mnemonics_meaning_info.text=hye.mnemonics
 			self.root.ids.mnemonics_meaning_ru_info.text=hye.mnemonics_ru
-			self.root.ids.mnemonics_reading_info.text="YOU MUST LISTEN TO ME, THIS IS VERY IMPORTANT!"
-			self.root.ids.mnemonics_reading_ru_info.text="THE MOST IMPORTANT THING YOU MUST DO IS ..."
+			self.root.ids.mnemonics_reading_info.text=""
+			self.root.ids.mnemonics_reading_ru_info.text=""
 			if not hye.hyerogliph:
 				self.root.ids.mdcard_lesson_info.opacity=0
 				self.root.ids.rad_pic_lesson_info.source=hye.pic_path
