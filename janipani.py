@@ -105,7 +105,7 @@ def list_reviews(DATA,lvl,reviews):
 	return L
 
 def list_lessons(DATA,lvl):
-	L,voc_check=[],0
+	L=[]
 	for radical in DATA[lvl-1]['rad']:
 		if radical.stage==-1:
 			L.append(radical)
@@ -117,7 +117,7 @@ def list_lessons(DATA,lvl):
 				L.append(kanji)
 			elif kanji.stage>=3:
 				kan3+=1
-	if kan3>=len(DATA[lvl-1]['kan'])*mult:
+	if (kan3>=len(DATA[lvl-1]['kan'])*mult) or sum([1 if i.stage>=0 else 0 for i in DATA[lvl-1]['voc']]):
 		for vocab in DATA[lvl-1]['voc']:
 			if vocab.stage==-1:
 				L.append(vocab)
@@ -127,12 +127,12 @@ def Lvl():
 	mult=0.9
 	lvl=1
 	for lv in range(59):
-		if (sum([1 if i.stage>4 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])) and \
-			(sum([1 if i.stage>0 else 0 for i in DATA[lv]['voc']])==len(DATA[lv]['voc'])) or sum([1 if i.stage>0 else 0 for i in DATA[lv+1]['kan']]):
+		if (sum([1 if i.stage>=5 else 0 for i in DATA[lv]['kan']])>=len(DATA[lv]['kan'])*mult) and (sum([1 if i.stage>=3 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])) and \
+			(sum([1 if i.stage>=2 else 0 for i in DATA[lv]['voc']])==len(DATA[lv]['voc'])) or sum([1 if i.stage>=0 else 0 for i in DATA[lv+1]['kan']]) or sum([1 if i.stage>=0 else 0 for i in DATA[lv+1]['rad']]):
 			lvl+=1
 		else:
 			return lvl
-	if (sum([1 if i.stage>4 else 0 for i in DATA[59]['kan']])>=len(DATA[59]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])):
+	if (sum([1 if i.stage>=5 else 0 for i in DATA[59]['kan']])>=len(DATA[59]['kan'])*mult) and (sum([1 if i.stage>=2 else 0 for i in DATA[lv]['kan']])==len(DATA[lv]['kan'])):
 			return lvl+1
 	return lvl
 
@@ -410,8 +410,8 @@ class MainApp(MDApp):
 					self.hye_review.stage=int(max(self.hye_review.stage-(math.ceil(self.Wrongs_count[self.hye_review]/2) * (1 if self.hye_review.stage<5 else 2)),1))
 				save()
 				self.Wrongs_count.pop(self.hye_review, None)
-			if (sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])>=len(DATA[self.lvl-1]['kan'])*mult) and (sum([1 if i.stage>1 else 0 for i in DATA[self.lvl-1]['kan']])==len(DATA[self.lvl-1]['kan'])) and \
-				(sum([1 if i.stage>0 else 0 for i in DATA[self.lvl-1]['voc']])==len(DATA[self.lvl-1]['voc'])):
+			if (sum([1 if i.stage>=5 else 0 for i in DATA[self.lvl-1]['kan']])>=len(DATA[self.lvl-1]['kan'])*mult) and (sum([1 if i.stage>=3 else 0 for i in DATA[self.lvl-1]['kan']])==len(DATA[self.lvl-1]['kan'])) and \
+				(sum([1 if i.stage>=2 else 0 for i in DATA[self.lvl-1]['voc']])==len(DATA[self.lvl-1]['voc'])):
 				self.lvl+=1
 			save()
 		else:
