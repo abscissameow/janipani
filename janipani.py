@@ -1,4 +1,5 @@
 from kivy.lang import Builder
+from kivy.clock import Clock
 from kivymd.app import MDApp
 from wanikani import *
 import pickle, random
@@ -18,7 +19,7 @@ def reset():
 				k.previous_review-=3600*24*60
 				k.stage=-1
 	save()
-# #reset()
+# # reset()
 
 def forecast(lvl):
 	latest=DATA[0]['rad'][0].previous_review + Delay[DATA[0]['rad'][0].stage]*3600
@@ -117,10 +118,10 @@ def list_lessons(DATA,lvl):
 				L.append(kanji)
 			elif kanji.stage>=3:
 				kan3+=1
-	if (kan3>=len(DATA[lvl-1]['kan'])*mult) or sum([1 if i.stage>=0 else 0 for i in DATA[lvl-1]['voc']]):
-		for vocab in DATA[lvl-1]['voc']:
-			if vocab.stage==-1:
-				L.append(vocab)
+		if (kan3>=len(DATA[lvl-1]['kan'])*mult) or sum([1 if i.stage>=0 else 0 for i in DATA[lvl-1]['voc']]):
+			for vocab in DATA[lvl-1]['voc']:
+				if vocab.stage==-1:
+					L.append(vocab)
 	return L
 
 def Lvl():
@@ -332,6 +333,7 @@ class MainApp(MDApp):
 		self.hide_everything_review()
 		
 		if not self.reviews:
+			# self.root.ids.correct.opacity=0
 			self.root.ids.play_review.text='NO CAKES!'
 			self.root.ids.play_review_button.opacity=1
 			self.root.ids.play_review_button.disabled=False
@@ -357,7 +359,7 @@ class MainApp(MDApp):
 		else:
 			self.rand = 0
 		
-		self.root.ids.meaning_reading.text=randdict[self.rand].capitalize()
+		self.root.ids.meaning_reading.text=randdict[self.rand]
 		self.root.ids.mdcard_review.md_bg_color=colors[self.hye_review.type]
 		self.root.ids.mdcard_review_rad.md_bg_color=colors[self.hye_review.type]
 		if not self.hye_review.hyerogliph:
@@ -369,6 +371,13 @@ class MainApp(MDApp):
 			self.root.ids.mdcard_review_rad.opacity=0
 			self.root.ids.mdcard_review.opacity=1
 	
+	def correct(self,dt):
+		self.root.ids.correct.opacity=0
+		self.theme_cls.primary_palette = "Cyan"
+		self.theme_cls.primary_hue='500'
+		self.root.ids.input.line_color_normal=(1,1,1,1)
+
+
 	def press_input(self):
 		self.refresh_shield=0
 		# self.root.ids.input.helper_text=''
@@ -397,6 +406,11 @@ class MainApp(MDApp):
 		text=convert_(self.root.ids.input.text.lower(), self.rand).strip()
 		kat=convert_('*'+self.root.ids.input.text.lower(),self.rand).strip()
 		if is_it(text, l, self.rand) or (kat in l):
+			self.root.ids.correct.opacity=1
+			self.theme_cls.primary_palette = "LightGreen"
+			self.theme_cls.primary_hue='A700'
+			self.root.ids.input.line_color_normal=(0,226/255,0,1)
+			Clock.schedule_once(self.correct, 1.1)
 			exec('self.hye_review.ind_'+randdict[self.rand]+'=1')
 			mult=0.9
 			if self.hye_review.ind_meaning and self.hye_review.ind_reading:
@@ -448,8 +462,8 @@ class MainApp(MDApp):
 			if self.hye_review not in self.Wrongs_count:
 				return
 			self.refresh_shield=1
-			self.root.ids.input.helper_text='i mean ok but its like you know'
-			self.root.ids.input.error_color= (0, 1, 0, 1)
+			self.root.ids.input.helper_text='   i mean ok but its like you know'
+			self.root.ids.input.error_color= (1, 233/255, 130/255, 1)
 			self.root.ids.input.text=''
 			self.root.ids.refresh_button.icon='refresh'
 			self.Wrongs_count[self.hye_review]-=1
