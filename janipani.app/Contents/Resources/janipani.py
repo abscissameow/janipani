@@ -46,7 +46,7 @@ def forecast(lvl):
 
 def distance(inpword,trueword,numbercheck=True):
 		inpword,trueword=inpword.strip(),trueword.strip()
-
+		linp,ltrue=len(inpword),len(trueword)
 		if numbercheck:
 			inp,tru=[],[]
 			for i in range(linp):
@@ -58,7 +58,6 @@ def distance(inpword,trueword,numbercheck=True):
 			if inp!=tru:
 				return 100
 
-		linp,ltrue=len(inpword),len(trueword)
 		D = np.zeros((linp+1, ltrue+1))
 		for i in range(linp+1):
 			for j in range(ltrue+1):
