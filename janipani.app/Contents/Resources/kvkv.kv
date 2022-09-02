@@ -21,6 +21,7 @@ MDBoxLayout:
                     AccordionItem:
                         title:'mnemonics Meaning'
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         MDLabel:
                             id: mnemonics_meaning
                             font_name: "meiryo"
@@ -28,6 +29,7 @@ MDBoxLayout:
                             text:'1'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'мнемоникс Мининг'
                         MDLabel:
                             id:mnemonics_meaning_ru
@@ -36,6 +38,7 @@ MDBoxLayout:
                             text:'2'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'mnemonics Reading'
                         MDLabel:
                             id: mnemonics_reading
@@ -44,6 +47,7 @@ MDBoxLayout:
                             text:'1'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'мнемоникс Ридинг'
                         MDLabel:
                             id: mnemonics_reading_ru
@@ -149,6 +153,27 @@ MDBoxLayout:
             text: "Reviews"
             icon: 'cards'
             on_tab_press: app.press_review_tab()
+            
+            MDCard:
+                id: correct
+                orientation:'vertical'
+                pos_hint: {"center_x": .1, "center_y": .38}
+                size_hint: None, None
+                size:  (root.size[0]/14,root.size[1]/3)
+                md_bg_color:130/255,180/255,0/255,1
+                radius:10
+                opacity:0
+                MDIcon:
+                    icon: 'sprout-outline'
+                    halign: 'center'
+                MDLabel:
+                    font_name: "meiryo"
+                    halign: 'center'
+                    font_size: 50
+                    text: "正\nし\nい\n"
+                    # halign: 'center'
+
+
             MDIconButton:
                 id: play_review_button
                 icon: 'cake'
@@ -165,12 +190,15 @@ MDBoxLayout:
                 id: meaning_reading
                 text: ""
                 font_size: 70
+                # theme_text_color: "Custom"
+                # text_color: 1, 1, 1, 1
                 halign: 'center'
-                pos_hint: {"center_x": .5, "center_y": .25}
+                pos_hint: {"center_x": .5, "center_y": .3}
             MDTextField:
                 id: input
                 helper_text: "hehe looser"
                 error:False
+                error_color: 225/255,0,64/255,1
                 line_color_normal: 1, 1, 1, 1
                 text_color: 1, 1, 1, 1
                 halign: 'center'
@@ -185,7 +213,7 @@ MDBoxLayout:
                 md_bg_color: app.theme_cls.primary_color
                 id: surrender_review_button
                 icon: "book-refresh"
-                pos_hint: {"center_x": .95, "center_y": .25}
+                pos_hint: {"center_x": .92, "center_y": .25}
                 on_release: app.press_review_surrender()
                 disabled:True
                 opacity:0
@@ -194,7 +222,7 @@ MDBoxLayout:
                 md_bg_color: app.theme_cls.primary_color
                 id: refresh_button
                 icon: "refresh"
-                pos_hint: {"center_x": .95, "center_y": .55}
+                pos_hint: {"center_x": .92, "center_y": .55}
                 on_release: app.press_refresh()
                 disabled:True
                 opacity:0
@@ -203,7 +231,7 @@ MDBoxLayout:
                 id: stage_review
                 md_bg_color: app.theme_cls.primary_color
                 text_color: app.theme_cls.primary_color
-                pos_hint: {"center_x": .92, "center_y": .85}
+                pos_hint: {"center_x": .9, "center_y": .85}
                 text: "apprentice"
                 disabled: True
                 opacity:0
@@ -212,7 +240,7 @@ MDBoxLayout:
             MDCard:
                 id: mdcard_review_rad
                 padding:10
-                pos_hint: {"center_x": .5, "center_y": .55}
+                pos_hint: {"center_x": .5, "center_y": .58}
                 size_hint: None, None
                 size:  (root.size[0]/3.5,root.size[1]/4)
                 text:""
@@ -228,7 +256,7 @@ MDBoxLayout:
             MDCard:
                 id: mdcard_review
                 padding:10
-                pos_hint: {"center_x": .5, "center_y": .55}
+                pos_hint: {"center_x": .5, "center_y": .58}
                 size_hint: None, None
                 size:  (root.size[0]/3.5,root.size[1]/4)
                 text:""
@@ -257,6 +285,7 @@ MDBoxLayout:
                     AccordionItem:
                         title:'mnemonics Meaning'
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         MDLabel:
                             id: mnemonics_meaning_review
                             font_name: "meiryo"
@@ -264,6 +293,7 @@ MDBoxLayout:
                             text:'1'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'мнемоникс Мининг'
                         MDLabel:
                             id:mnemonics_meaning_ru_review
@@ -272,6 +302,7 @@ MDBoxLayout:
                             text:'2'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'mnemonics Reading'
                         MDLabel:
                             id: mnemonics_reading_review
@@ -280,6 +311,7 @@ MDBoxLayout:
                             text:'1'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'мнемоникс Ридинг'
                         MDLabel:
                             id: mnemonics_reading_ru_review
@@ -361,6 +393,164 @@ MDBoxLayout:
                     pos_hint: {"center_x": .5, "center_y": .5}
                     text: ""
                     halign: 'center'
+
+
+
+
+        #--------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------
+        MDBottomNavigationItem:
+            name: 'challenge'
+            text: "challenge"
+            icon: 'flash'
+            on_tab_press: app.press_challenge_tab()
+            MDIconButton:
+                id: play_challenge_button
+                icon: "cake"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: app.play_challenge_button()
+                md_bg_color: app.theme_cls.primary_color
+            MDLabel:
+                id: play_challenge
+                text: "LET'S CAKE!"
+                halign: 'center'
+                pos_hint: {"center_x": .5, "center_y": .4}
+            
+            MDCard:
+                id: mdcard_challenge_rad
+                padding:10
+                pos_hint: {"center_x": .5, "center_y": .58}
+                size_hint: None, None
+                size:  (root.size[0]/3.5,root.size[1]/4)
+                text:""
+                md_bg_color:255/255,191/255,0/255,1
+                radius:100
+                opacity:0
+                Image:
+                    id: rad_pic_challenge
+                    source: 'gun.png'
+                    opacity: 1
+            MDCard:
+                id: mdcard_challenge
+                padding:10
+                pos_hint: {"center_x": .5, "center_y": .58}
+                size_hint: None, None
+                size:  (root.size[0]/3.5,root.size[1]/4)
+                text:""
+                md_bg_color:255/255,191/255,0/255,1
+                radius:100
+                opacity:0
+                MDLabel:
+                    id: hyerogliph_challenge
+                    font_name: "meiryo"
+                    font_size: 0 if not self.text else max(root.ids.mdcard_challenge.width/2,root.ids.mdcard_challenge.height/3)/(2 if len(self.text)==1 else len(self.text)/1.5 )
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    text: ""
+                    halign: 'center'
+            MDLabel:
+                id: meaning_reading_challenge
+                text: ""
+                font_size: 70
+                halign: 'center'
+                pos_hint: {"center_x": .5, "center_y": .3}
+            
+            MDTextField:
+                id: input_challenge
+                helper_text: "hehe looser"
+                error:False
+                line_color_normal: 1, 1, 1, 1
+                text_color: 1, 1, 1, 1
+                halign: 'center'
+                font_name: "meiryo"
+                font_size: 90
+                opacity:0
+                disabled: True
+                on_text_validate: app.press_input_challenge()
+            
+            MDCard:
+                id: correct_challenge
+                orientation:'vertical'
+                pos_hint: {"center_x": .1, "center_y": .38}
+                size_hint: None, None
+                size:  (root.size[0]/14,root.size[1]/3)
+                md_bg_color:130/255,180/255,0/255,1
+                radius:10
+                opacity:0
+                MDIcon:
+                    icon: 'sprout-outline'
+                    halign: 'center'
+                MDLabel:
+                    id:cor_ch
+                    font_name: "meiryo"
+                    halign: 'center'
+                    font_size: 50
+                    text: "正\nし\nい\n"
+            MDCard:
+                id: correct_challenge1
+                orientation:'vertical'
+                pos_hint: {"center_x": .9, "center_y": .38}
+                size_hint: None, None
+                size:  (root.size[0]/14,root.size[1]/3)
+                md_bg_color:130/255,180/255,0/255,1
+                radius:10
+                opacity:0
+                MDIcon:
+                    icon: 'sprout-outline'
+                    halign: 'center'
+                MDLabel:
+                    id:cor_ch1
+                    font_name: "meiryo"
+                    halign: 'center'
+                    font_size: 50
+                    text: "正\nし\nい\n"
+            MDCard:
+                id: incorrect_challenge
+                orientation:'vertical'
+                pos_hint: {"center_x": .1, "center_y": .38}
+                size_hint: None, None
+                size:  (root.size[0]/14,root.size[1]/3)
+                md_bg_color:225/255,0,64/255,1
+                radius:10
+                opacity:0
+                MDLabel:
+                    font_name: "meiryo"
+                    halign: 'center'
+                    font_size: 50
+                    text: "正\nし\nく\nな\nい"
+            MDCard:
+                id: incorrect_challenge1
+                orientation:'vertical'
+                pos_hint: {"center_x": .9, "center_y": .38}
+                size_hint: None, None
+                size:  (root.size[0]/14,root.size[1]/3)
+                md_bg_color:225/255,0,64/255,1
+                radius:10
+                opacity:0
+                MDLabel:
+                    font_name: "meiryo"
+                    halign: 'center'
+                    font_size: 50
+                    text: "正\nし\nく\nな\nい"
+
+            MDCard:
+                id: mdcard_counter_challenge
+                padding:10
+                pos_hint: {"center_x": .9, "center_y": .9}
+                size_hint: None, None
+                size:  (root.size[0]/14,root.size[1]/10)
+                md_bg_color: app.theme_cls.primary_color
+                radius:30
+                opacity:0
+                MDLabel:
+                    id: mdcard_counter_challenge_text
+                    font_name: "meiryo"
+                    font_size: 70
+                    # pos_hint: {"center_x": .5, "center_y": .5}
+                    text: "10"
+                    halign: 'center'
+
+
+
 
         #--------------------------------------------------------------------------------------------
         #--------------------------------------------------------------------------------------------
@@ -519,6 +709,7 @@ MDBoxLayout:
                     AccordionItem:
                         title:'mnemonics Meaning'
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         MDLabel:
                             id: mnemonics_meaning_info
                             font_name: "meiryo"
@@ -526,6 +717,7 @@ MDBoxLayout:
                             text:'1'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'мнемоникс Мининг'
                         MDLabel:
                             id:mnemonics_meaning_ru_info
@@ -534,6 +726,7 @@ MDBoxLayout:
                             text:'2'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'mnemonics Reading'
                         MDLabel:
                             id: mnemonics_reading_info
@@ -542,6 +735,7 @@ MDBoxLayout:
                             text:'1'
                     AccordionItem:
                         background_normal:'accordion.png'
+                        background_selected:'accordion1.png'
                         title:'мнемоникс Ридинг'
                         MDLabel:
                             id: mnemonics_reading_ru_info
@@ -631,6 +825,10 @@ MDBoxLayout:
                     pos_hint: {"center_x": .5, "center_y": .5}
                     text: ""
                     halign: 'center'
+
+
+
+            
 
                 
 
