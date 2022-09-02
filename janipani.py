@@ -44,10 +44,39 @@ def forecast(lvl):
 	latest = max(0,(latest-time.time())//60)
 	return f"next review in {int(latest//60)}h {int(latest%60)}m"
 
+def distance(inpword,trueword,numbercheck=True):
+		inpword,trueword=inpword.strip(),trueword.strip()
+
+		if numbercheck:
+			inp,tru=[],[]
+			for i in range(linp):
+				if inpword[i]>='0' and inpword[i]<='9':
+					inp.append(inpword[i])
+			for i in range(ltrue):
+				if trueword[i]>='0' and trueword[i]<='9':
+					tru.append(trueword[i])
+			if inp!=tru:
+				return 100
+
+		linp,ltrue=len(inpword),len(trueword)
+		D = np.zeros((linp+1, ltrue+1))
+		for i in range(linp+1):
+			for j in range(ltrue+1):
+				if i==0:
+					D[i,j]=j
+				elif j==0:
+					D[i,j]=i
+				else:
+					D[i,j]=min(D[i-1,j]+1, D[i,j-1]+1, D[i-1,j-1] + 1 - (inpword[i-1]==trueword[j-1]))
+		return D[linp,ltrue]
+
+def sortby(text,L):
+	L.sort(key = lambda hye: min(distance(text, meaning, False) for meaning in (hye.meaning if isinstance(hye.meaning, list) else [hye.meaning])))
+	return L
+
 def is_it(input, answers, indicator):
 	if indicator:
-		return input in answers
-		
+		return input in answers	
 	# def compare(inp_word,true_word):
 	# 	mistakes=0
 	# 	dictrue,dicinp = {},{}
@@ -76,26 +105,10 @@ def is_it(input, answers, indicator):
 	# 			continue
 	# 		mistakes+=abs(dictrue[i]-dicinp[i])/2
 	# 	return int(mistakes)
-	def distance(inpword,trueword):
-		linp,ltrue=len(inpword),len(trueword)
-		D = np.zeros((linp+1, ltrue+1))
-		for i in range(linp+1):
-			for j in range(ltrue+1):
-				if i==0:
-					D[i,j]=j
-				elif j==0:
-					D[i,j]=i
-				else:
-					D[i,j]=min(D[i-1,j]+1, D[i,j-1]+1, D[i-1,j-1] + 1 - (inpword[i-1]==trueword[j-1]))
-		return D[linp,ltrue]
-    
 	for phrase in answers:
 		if distance(input,phrase)<=(1 if len(phrase)<=5 else 2 if len(phrase)<=9 else 3):
 			return True
 	return False
-
-def sortby(text,L):
-	return L
 
 def list_reviews(DATA,lvl,reviews):
 	L=[]
@@ -641,13 +654,13 @@ class MainApp(MDApp):
 			try:
 				self.root.ids.search.font_size=80
 				self.root.ids.search.hint_text="  enter _help"
-				if self.root.ids.search.text=="ENTER: 'meaning' / 'type meaning' / 'lvl n' / 'show n' / '_spread n'(hours)":
+				if self.root.ids.search.text=="ENTER: 'meaning' / 'type meaning' / 'lvl n' / '_spread n'(hours)":
 					self.root.ids.search.text=''
 					return
 				if self.root.ids.search.text=='_help':
 					self.root.ids.search.hint_text=''
-					self.root.ids.search.font_size=40
-					self.root.ids.search.text="ENTER: 'meaning' / 'type meaning' / 'lvl n' / 'show n' / '_spread n'(hours)"
+					self.root.ids.search.font_size=50
+					self.root.ids.search.text="ENTER: 'meaning' / 'type meaning' / 'lvl n' / '_spread n'(hours)"
 					return
 				self.infos=[]
 				L=self.root.ids.search.text.lower().split(' ',1)
@@ -663,18 +676,18 @@ class MainApp(MDApp):
 					save()
 					self.root.ids.search.text+=' done'
 					return
-				elif L[0]=='show' and len(L)>1:
-					maxl=int(L[1])
-					for i in range(self.lvl):
-						for hyes in DATA[i].values():
-							for k in hyes:
-								if len(self.infos)<maxl:
-									self.infos.append(k)
-								else:
-									for j in range(maxl):
-										better = k.previous_review + Delay[k.stage]*3600 < self.infos[j].previous_review + Delay[self.infos[j].stage]*3600
-										if (k not in self.infos) and better:
-											self.infos[j]=k
+				# elif L[0]=='show' and len(L)>1:
+				# 	maxl=int(L[1])
+				# 	for i in range(self.lvl):
+				# 		for hyes in DATA[i].values():
+				# 			for k in hyes:
+				# 				if len(self.infos)<maxl:
+				# 					self.infos.append(k)
+				# 				else:
+				# 					for j in range(maxl):
+				# 						better = k.previous_review + Delay[k.stage]*3600 < self.infos[j].previous_review + Delay[self.infos[j].stage]*3600
+				# 						if (k not in self.infos) and better:
+				# 							self.infos[j]=k
 				# elif L[0]=='_set':
 				# 	lvl,typ,h,to=L[1].split(' ')
 				# 	for i in DATA[int(lvl)-1][typ]:
@@ -703,15 +716,12 @@ class MainApp(MDApp):
 										break
 				else:
 					type,text = L
-					if text>='1' and text<='60':
-						self.infos=[i for i in DATA[int(text)-1][type]]
-					else:
-						for i in range(60):
-							for hye in DATA[i][type]:
-								for meaning in (lambda x: [x] if type=='rad' else x)(hye.meaning):
-									if text in meaning:
-										self.infos.append(hye)
-										break
+					for i in range(60):
+						for hye in DATA[i][type]:
+							for meaning in (lambda x: [x] if type=='rad' else x)(hye.meaning):
+								if text in meaning:
+									self.infos.append(hye)
+									break
 				if not self.infos:
 					self.root.ids.search.current_hint_text_color=(225/255,0,64/255,1)
 					self.root.ids.search.hint_text=f"  couldn't find relevant: '{self.root.ids.search.text}'"
@@ -813,15 +823,16 @@ class MainApp(MDApp):
 			residual=str(round(t//(3600)))+'h '+ str(round((t-round(t//(3600))*3600)//60))+'m'
 		if self.root.ids.stage_info.text==stage:
 			if self.hye_info.stage==-1:
-				self.root.ids.stage_info.text='who knows'
+				self.root.ids.stage_info.text='∞ h'
 			else:
 				self.root.ids.stage_info.text=residual
-		elif self.root.ids.stage_info.text in [residual,'who knows']:
-			if self.hye_info.stage==-1:
-				self.root.ids.stage_info.text='not exists'
-			else:
-				t=time.time()-self.hye_info.previous_review
-				self.root.ids.stage_info.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
+		elif self.root.ids.stage_info.text in [residual,'∞ h']:
+			# if self.hye_info.stage==-1:
+			# 	self.root.ids.stage_info.text='not exists'
+			# else:
+			# 	t=time.time()-self.hye_info.previous_review
+			# 	self.root.ids.stage_info.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
+			self.root.ids.stage_info.text='lvl '+str(self.hye_info.lvl)
 		else:
 			self.root.ids.stage_info.text=stage
 	#----------------------------------------------------------------------------------------------
