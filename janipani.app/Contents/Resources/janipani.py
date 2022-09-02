@@ -48,39 +48,54 @@ def is_it(input, answers, indicator):
 	if indicator:
 		return input in answers
 		
-	def compare(inp_word,true_word):
-		mistakes=0
-		dictrue,dicinp = {},{}
-		for i in true_word:
-			if i in dictrue: 
-				dictrue[i] += 1
-			else: 
-				dictrue[i] = 1
-		for i in inp_word:
-			if i in dicinp: 
-				dicinp[i] += 1
-			else: 
-				dicinp[i] = 1
-		for i in dictrue:
-			if i not in dicinp:
-				if i>='0' and i<='9':
-					return 10
-				mistakes+=dictrue[i]
-				continue
-			mistakes+=abs(dictrue[i]-dicinp[i])
-		for i in dicinp:
-			if i not in dictrue:
-				if i>='0' and i<='9':
-					return 10
-				mistakes+=dicinp[i]/2
-				continue
-			mistakes+=abs(dictrue[i]-dicinp[i])/2
-		return int(mistakes)
+	# def compare(inp_word,true_word):
+	# 	mistakes=0
+	# 	dictrue,dicinp = {},{}
+	# 	for i in true_word:
+	# 		if i in dictrue: 
+	# 			dictrue[i] += 1
+	# 		else: 
+	# 			dictrue[i] = 1
+	# 	for i in inp_word:
+	# 		if i in dicinp: 
+	# 			dicinp[i] += 1
+	# 		else: 
+	# 			dicinp[i] = 1
+	# 	for i in dictrue:
+	# 		if i not in dicinp:
+	# 			if i>='0' and i<='9':
+	# 				return 10
+	# 			mistakes+=dictrue[i]
+	# 			continue
+	# 		mistakes+=abs(dictrue[i]-dicinp[i])
+	# 	for i in dicinp:
+	# 		if i not in dictrue:
+	# 			if i>='0' and i<='9':
+	# 				return 10
+	# 			mistakes+=dicinp[i]/2
+	# 			continue
+	# 		mistakes+=abs(dictrue[i]-dicinp[i])/2
+	# 	return int(mistakes)
+	def distance(inpword,trueword):
+		linp,ltrue=len(inpword),len(trueword)
+		D = np.zeros((linp+1, ltrue+1))
+		for i in range(linp+1):
+			for j in range(ltrue+1):
+				if i==0:
+					D[i,j]=j
+				elif j==0:
+					D[i,j]=i
+				else:
+					D[i,j]=min(D[i-1,j]+1, D[i,j-1]+1, D[i-1,j-1] + 1 - (inpword[i-1]==trueword[j-1]))
+		return D[linp,ltrue]
     
 	for phrase in answers:
-		if compare(input,phrase)<=(1 if len(phrase)<=5 else 2):
+		if distance(input,phrase)<=(1 if len(phrase)<=5 else 2 if len(phrase)<=9 else 3):
 			return True
 	return False
+
+def sortby(text,L):
+	return L
 
 def list_reviews(DATA,lvl,reviews):
 	L=[]
@@ -205,6 +220,8 @@ class MainApp(MDApp):
 		self.theme_cls.primary_palette = "Cyan"
 		self.theme_cls.primary_hue='500'
 	def press_info_tab(self):
+		self.root.ids.search.font_size=80
+		self.root.ids.search.text=''
 		self.root.ids.forecast.text = forecast(self.lvl)
 		# self.root.ids.forecast.md_bg_color=self.theme_cls.primary_color
 		self.root.ids.Apprentice.text,self.root.ids.Guru.text,self.root.ids.Master.text,self.root.ids.Enlightened.text,self.root.ids.Burned.text=count_stages(self.lvl)
@@ -212,7 +229,7 @@ class MainApp(MDApp):
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
 		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])+len(DATA[self.lvl-1]['voc']))
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
-		self.root.ids.search.hint_text="   the search"
+		self.root.ids.search.hint_text="  enter _help"
 		self.root.ids.active_lessons.text = f'Active lessons: {len(list_lessons(DATA,self.lvl))}'
 		self.root.ids.active_reviews.text = f'Active reviews: {len(self.reviews)+len(list_reviews(DATA,self.lvl,self.reviews))}'
 		self.theme_cls.primary_palette = "DeepPurple"
@@ -608,7 +625,7 @@ class MainApp(MDApp):
 		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])+len(DATA[self.lvl-1]['voc']))
 		self.root.ids.progress_bar.opacity=1
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
-		self.root.ids.search.hint_text="   the search"
+		self.root.ids.search.hint_text="  enter _help"
 		self.root.ids.search.text=''
 		self.root.ids.search.disabled=False
 		self.root.ids.search.opacity=1
@@ -622,6 +639,16 @@ class MainApp(MDApp):
 	def search(self,indicator):
 		if indicator==0:
 			try:
+				self.root.ids.search.font_size=80
+				self.root.ids.search.hint_text="  enter _help"
+				if self.root.ids.search.text=="ENTER: 'meaning' / 'type meaning' / 'lvl n' / 'show n' / '_spread n'(hours)":
+					self.root.ids.search.text=''
+					return
+				if self.root.ids.search.text=='_help':
+					self.root.ids.search.hint_text=''
+					self.root.ids.search.font_size=40
+					self.root.ids.search.text="ENTER: 'meaning' / 'type meaning' / 'lvl n' / 'show n' / '_spread n'(hours)"
+					return
 				self.infos=[]
 				L=self.root.ids.search.text.lower().split(' ',1)
 				if L[0]=='_spread':
@@ -636,25 +663,7 @@ class MainApp(MDApp):
 					save()
 					self.root.ids.search.text+=' done'
 					return
-				elif L[0]=='_stage':
-					lvl,typ,h,to=L[1].split(' ')
-					for i in DATA[int(lvl)-1][typ]:
-						if h in i.meaning:
-							i.stage=int(to)
-							save()
-							self.root.ids.search.text+=' done'
-							return
-				elif L[0]=='_time':
-					lvl,typ,h=L[1].split(' ')
-					for i in DATA[int(lvl)-1][typ]:
-						if h in i.meaning:
-							i.previous_review=time.time()-1000*3600
-							save()
-							self.root.ids.search.text+=' done'
-							return
-				elif L[0]=='lvl':
-					self.infos=[item for sublist in DATA[int(L[1])-1].values() for item in sublist]
-				elif L[0]=='check' and len(L)>1:
+				elif L[0]=='show' and len(L)>1:
 					maxl=int(L[1])
 					for i in range(self.lvl):
 						for hyes in DATA[i].values():
@@ -666,6 +675,24 @@ class MainApp(MDApp):
 										better = k.previous_review + Delay[k.stage]*3600 < self.infos[j].previous_review + Delay[self.infos[j].stage]*3600
 										if (k not in self.infos) and better:
 											self.infos[j]=k
+				# elif L[0]=='_set':
+				# 	lvl,typ,h,to=L[1].split(' ')
+				# 	for i in DATA[int(lvl)-1][typ]:
+				# 		if h in i.meaning:
+				# 			i.stage=int(to)
+				# 			save()
+				# 			self.root.ids.search.text+=' done'
+				# 			return
+				# elif L[0]=='_time_reset':
+				# 	lvl,typ,h=L[1].split(' ')
+				# 	for i in DATA[int(lvl)-1][typ]:
+				# 		if h in i.meaning:
+				# 			i.previous_review=time.time()-1000*3600
+				# 			save()
+				# 			self.root.ids.search.text+=' done'
+				# 			return
+				elif L[0]=='lvl':
+					self.infos=[item for sublist in DATA[int(L[1])-1].values() for item in sublist]
 				elif L[0] not in ['rad','kan','voc']:
 					for i in range(60):
 						for hyes in DATA[i].values():
@@ -686,13 +713,13 @@ class MainApp(MDApp):
 										self.infos.append(hye)
 										break
 				if not self.infos:
-					self.root.ids.search.current_hint_text_color=(1,0.2,0.2,1)
-					self.root.ids.search.hint_text=f"   couldn't find relevant: '{self.root.ids.search.text}'"
+					self.root.ids.search.current_hint_text_color=(225/255,0,64/255,1)
+					self.root.ids.search.hint_text=f"  couldn't find relevant: '{self.root.ids.search.text}'"
 					self.root.ids.search.text=''
 					return
 			except:
-				self.root.ids.search.current_hint_text_color=(1,0.2,0.2,1)
-				self.root.ids.search.hint_text=f"   couldn't find relevant: '{self.root.ids.search.text}'"
+				self.root.ids.search.current_hint_text_color=(225/255,0,64/255,1)
+				self.root.ids.search.hint_text=f"  couldn't find relevant: '{self.root.ids.search.text}'"
 				self.root.ids.search.text=''
 				return
 		else:
@@ -700,6 +727,8 @@ class MainApp(MDApp):
 				self.press_lesson_cake_info()
 				return
 		
+		self.infos=sortby(self.root.ids.search.text,self.infos)
+
 		self.hide_everything_info()
 		
 		self.root.ids.info_next.opacity=1
