@@ -1,5 +1,6 @@
 from kivy.lang import Builder
 from kivy.clock import Clock
+import random
 from kivymd.app import MDApp
 from wanikani import *
 import pickle, random
@@ -8,6 +9,8 @@ def save():
 	# return
 	with open('DATA.pkl', 'wb') as outp:
 		pickle.dump(DATA, outp, pickle.HIGHEST_PROTOCOL)
+	with open('CHALLENGE.pkl', 'wb') as outp:
+		pickle.dump(CHALLENGE, outp, pickle.HIGHEST_PROTOCOL)
 
 with open('DATA.pkl', 'rb') as inp:
     DATA=pickle.load(inp)
@@ -18,8 +21,18 @@ def reset():
 			for k in j:
 				k.previous_review-=3600*24*60
 				k.stage=-1
+	global CHALLENGE
+	CHALLENGE=[0, datetime.now()]
 	save()
-# # reset()
+# # reset() 
+
+try:
+    with open('CHALLENGE.pkl', 'rb') as inp:
+    	CHALLENGE=pickle.load(inp)
+except:
+	CHALLENGE=[0, datetime.now()]
+	save()
+
 
 def forecast(lvl):
 	latest=DATA[0]['rad'][0].previous_review + Delay[DATA[0]['rad'][0].stage]*3600
@@ -64,29 +77,10 @@ def is_it(input, answers, indicator):
 			mistakes+=abs(dictrue[i]-dicinp[i])/2
 		return int(mistakes)
     
-	# res=True
-	# input_words=input.split(' ')
-	# same_length=0
-	# mistakes=0
 	for phrase in answers:
 		if compare(input,phrase)<=(1 if len(phrase)<=5 else 2):
 			return True
-		# phrase_words=phrase.split(' ')
-		# if len(input_words)!=len(phrase_words):
-		# 	continue
-		# else:
-		# 	mistakes=0
-		# 	same_length=1
-		# for i in range(len(phrase_words)):
-		# 	mistakes += compare(input_words[i],phrase_words[i])
-
-		# if mistakes<=len(phrase_words):
-		# 	return True
 	return False
-	# if mistakes>len(phrase_words):
-	# 		return False
-
-	# return (res if same_length else False)
 
 def list_reviews(DATA,lvl,reviews):
 	L=[]
@@ -155,6 +149,19 @@ def count_stages(lvl):
 						burn+=1
 	return str(appr),str(guru),str(master),str(enl),str(burn)
 
+def fill_daily_hyes(obj,n=10):
+	if (datetime.now()-CHALLENGE[1]).days>=1:
+		CHALLENGE[0]=0
+		CHALLENGE[1]=datetime.now()
+	hyes=[]
+	if CHALLENGE[0]<n:
+		for lvl in range(obj.lvl):
+			for j in DATA[lvl].values():
+				for k in j:
+					hyes.append(k)
+	n=min(len(hyes),n)
+	return [] if not hyes else random.sample(hyes,n)
+jap_nums={0:'零',1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}
 colors={'rad':(0,163/255,245/255,1),'kan':(252/255,84/255,148/255,1),'voc':(96/255, 0, 144/255,1)}
 class MainApp(MDApp):	
 	lvl=Lvl()
@@ -168,6 +175,9 @@ class MainApp(MDApp):
 	infos=[]
 	refresh_shield=0
 	hye_info=None
+	daily_hyes=[]
+	hye_challenge=None
+	rand_challenge=None
 
 	def build(self):
 		self.theme_cls.theme_style = "Dark"
@@ -195,15 +205,20 @@ class MainApp(MDApp):
 		self.root.ids.forecast.text = forecast(self.lvl)
 		# self.root.ids.forecast.md_bg_color=self.theme_cls.primary_color
 		self.root.ids.Apprentice.text,self.root.ids.Guru.text,self.root.ids.Master.text,self.root.ids.Enlightened.text,self.root.ids.Burned.text=count_stages(self.lvl)
-		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
+		loc=sum([1 if i.stage>=5 else 0 for i in DATA[self.lvl-1]['kan']])+sum([1 if i.stage>=2 else 0 for i in DATA[self.lvl-1]['voc']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
-		self.root.ids.progress_bar.value=100*loc/len(DATA[self.lvl-1]['kan'])
+		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])+len(DATA[self.lvl-1]['voc']))
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
 		self.root.ids.search.hint_text="   the search"
 		self.root.ids.active_lessons.text = f'Active lessons: {len(list_lessons(DATA,self.lvl))}'
 		self.root.ids.active_reviews.text = f'Active reviews: {len(self.reviews)+len(list_reviews(DATA,self.lvl,self.reviews))}'
 		self.theme_cls.primary_palette = "DeepPurple"
 		self.theme_cls.primary_hue='300'
+	def press_challenge_tab(self):
+		if not self.daily_hyes:
+			self.root.ids.play_challenge.text="LET'S CAKE!"
+		self.theme_cls.primary_palette = "Indigo"
+		self.theme_cls.primary_hue='400'
 	
 	def hide_everything_lesson(self):
 		self.root.ids.play_lesson.opacity=0
@@ -445,7 +460,7 @@ class MainApp(MDApp):
 				self.root.ids.meaning_reading.text = f"oops! I am looking for {randdict[self.rand].capitalize()}!"
 				self.root.ids.input.text=''
 				return
-			self.root.ids.input.error_color= (1, 0, 0, 1)
+			self.root.ids.input.error_color= (225/255,0,64/255,1)
 			self.root.ids.refresh_button.icon='shield-refresh'
 			self.Wrongs_count[self.hye_review]=self.Wrongs_count.get(self.hye_review,0)+1
 			self.root.ids.input.error=True
@@ -584,10 +599,10 @@ class MainApp(MDApp):
 		self.root.ids.forecast.opacity=1
 		self.root.ids.forecast.text = forecast(self.lvl)
 		self.root.ids.progress.opacity=1
-		loc=sum([1 if i.stage>4 else 0 for i in DATA[self.lvl-1]['kan']])
+		loc=sum([1 if i.stage>=5 else 0 for i in DATA[self.lvl-1]['kan']])+sum([1 if i.stage>=2 else 0 for i in DATA[self.lvl-1]['voc']])
 		self.root.ids.progress.text=f'Your level is {self.lvl}'
 		self.root.ids.progress_under.text='guru kanji '+str(loc)+'/'+str(len(DATA[self.lvl-1]['kan']))
-		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])*mult)
+		self.root.ids.progress_bar.value=100*loc/(len(DATA[self.lvl-1]['kan'])+len(DATA[self.lvl-1]['voc']))
 		self.root.ids.progress_bar.opacity=1
 		self.root.ids.search.current_hint_text_color=self.theme_cls.primary_color
 		self.root.ids.search.hint_text="   the search"
@@ -777,6 +792,100 @@ class MainApp(MDApp):
 				self.root.ids.stage_info.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
 		else:
 			self.root.ids.stage_info.text=stage
+	#----------------------------------------------------------------------------------------------
+	def hide_everything_challenge(self):
+		self.root.ids.play_challenge_button.disable=True
+		self.root.ids.play_challenge_button.opacity=0
+		self.root.ids.play_challenge.opacity=0
+		self.root.ids.mdcard_challenge.opacity=0
+		self.root.ids.mdcard_challenge_rad.opacity=0
+		self.root.ids.meaning_reading_challenge.opacity=0
+		# self.root.ids.correct_challenge.opacity=0
+		# self.root.ids.correct_challenge1.opacity=0
+		self.root.ids.input_challenge.opacity=0
+		self.root.ids.input_challenge.disabled=True
+
+		self.root.ids.mdcard_counter_challenge.opacity=0
+	
+	def play_challenge_button(self):
+		self.root.ids.input_challenge.error=False
+		self.daily_hyes=self.daily_hyes if self.daily_hyes else fill_daily_hyes(self,10)
+		
+		self.hide_everything_challenge()
+		
+		if not self.daily_hyes:
+			self.root.ids.play_challenge.opacity=1
+			self.root.ids.play_challenge_button.opacity=1
+			self.root.ids.play_challenge_button.disabled=False
+			self.root.ids.play_challenge.text='NO CAKES!'
+			return
+		
+		self.root.ids.mdcard_counter_challenge.opacity=1
+		self.root.ids.mdcard_counter_challenge_text.text=jap_nums[CHALLENGE[0]]
+
+		self.root.ids.meaning_reading_challenge.opacity=1
+		self.root.ids.input_challenge.opacity=1
+		self.root.ids.input_challenge.disabled=False		
+		
+		self.hye_challenge=self.daily_hyes.pop()#!!!
+
+		self.rand_challenge = 0 if self.hye_challenge.type=='rad' else random.randint(0,1)
+		
+		self.root.ids.meaning_reading_challenge.text=randdict[self.rand_challenge]
+		self.root.ids.mdcard_challenge.md_bg_color=colors[self.hye_challenge.type]
+		self.root.ids.mdcard_challenge_rad.md_bg_color=colors[self.hye_challenge.type]
+		if not self.hye_challenge.hyerogliph:
+			self.root.ids.rad_pic_challenge.source=self.hye_challenge.pic_path
+			self.root.ids.mdcard_challenge_rad.opacity=1
+			self.root.ids.mdcard_challenge.opacity=0
+		else:
+			self.root.ids.hyerogliph_challenge.text=self.hye_challenge.hyerogliph
+			self.root.ids.mdcard_challenge_rad.opacity=0
+			self.root.ids.mdcard_challenge.opacity=1
+
+	def correct_challenge(self,dt):
+		self.root.ids.correct_challenge.opacity=0
+		self.root.ids.correct_challenge1.opacity=0
+		self.root.ids.incorrect_challenge.opacity=0
+		self.root.ids.incorrect_challenge1.opacity=0
+		self.root.ids.input_challenge.line_color_normal=(1,1,1,1)
+	
+	def press_input_challenge(self):
+		self.hide_everything_challenge()
+
+		if self.hye_challenge.type=='rad':
+			l=[self.hye_challenge.meaning]
+		elif not self.rand_challenge:
+			l=self.hye_challenge.meaning
+		elif self.hye_challenge.type=='kan':
+			if self.hye_challenge.main_reading=='kun':
+				l=self.hye_challenge.kun_reading
+			elif self.hye_challenge.main_reading=='on':
+				l=self.hye_challenge.on_reading
+			else:
+				l=[self.hye_challenge.main_reading[8:]]
+		else:
+			l=self.hye_challenge.reading
+		
+		text=convert_(self.root.ids.input_challenge.text.lower(), self.rand_challenge).strip()
+		kat=convert_('*'+self.root.ids.input_challenge.text.lower(),self.rand_challenge).strip()
+		if is_it(text, l, self.rand_challenge) or (kat in l):
+			CHALLENGE[0]+=1
+			CHALLENGE[1]=datetime.now()
+			self.root.ids.correct_challenge.opacity=1
+			self.root.ids.correct_challenge1.opacity=1
+			self.root.ids.input_challenge.line_color_normal=(130/255,180/255,0/255,1)
+		else:
+			self.daily_hyes=[self.hye_challenge]+self.daily_hyes
+			self.root.ids.incorrect_challenge.opacity=1
+			self.root.ids.incorrect_challenge1.opacity=1
+			self.root.ids.input_challenge.line_color_normal=(225/255,0,64/255,1)
+		
+		Clock.schedule_once(self.correct_challenge, 1.1)
+		self.root.ids.input_challenge.text=''
+		self.play_challenge_button()
+
+
 
 
 		
