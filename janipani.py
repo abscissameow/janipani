@@ -150,10 +150,13 @@ def count_stages(lvl):
 	return str(appr),str(guru),str(master),str(enl),str(burn)
 
 def fill_daily_hyes(obj,n=10):
+	if obj.daily_hyes:
+		return obj.daily_hyes
 	if (datetime.now()-CHALLENGE[1]).days>=1:
 		CHALLENGE[0]=0
 		CHALLENGE[1]=datetime.now()
 	hyes=[]
+	CHALLENGE[0]=min(CHALLENGE[0],n)
 	if CHALLENGE[0]<n:
 		for lvl in range(obj.lvl):
 			for j in DATA[lvl].values():
@@ -809,7 +812,7 @@ class MainApp(MDApp):
 	
 	def play_challenge_button(self):
 		self.root.ids.input_challenge.error=False
-		self.daily_hyes=self.daily_hyes if self.daily_hyes else fill_daily_hyes(self,10)
+		self.daily_hyes=fill_daily_hyes(self,10)
 		
 		self.hide_everything_challenge()
 		
@@ -821,7 +824,7 @@ class MainApp(MDApp):
 			return
 		
 		self.root.ids.mdcard_counter_challenge.opacity=1
-		self.root.ids.mdcard_counter_challenge_text.text=jap_nums[CHALLENGE[0]]
+		self.root.ids.mdcard_counter_challenge_text.text=jap_nums[CHALLENGE[0]+1]
 
 		self.root.ids.meaning_reading_challenge.opacity=1
 		self.root.ids.input_challenge.opacity=1
@@ -875,6 +878,7 @@ class MainApp(MDApp):
 			self.root.ids.correct_challenge.opacity=1
 			self.root.ids.correct_challenge1.opacity=1
 			self.root.ids.input_challenge.line_color_normal=(130/255,180/255,0/255,1)
+			save()
 		else:
 			self.daily_hyes=[self.hye_challenge]+self.daily_hyes
 			self.root.ids.incorrect_challenge.opacity=1
