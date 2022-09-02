@@ -33,6 +33,30 @@ except:
 	CHALLENGE=[0, datetime.now()]
 	save()
 
+def updateCHALLENGE():
+	global CHALLENGE
+	date_format = "%m/%d/%Y"
+	today = datetime.strptime(datetime.now().strftime(date_format), date_format)
+	prev = datetime.strptime(CHALLENGE[1].strftime(date_format), date_format)
+	if (today-prev).days>=1:
+		CHALLENGE[0]=0
+		CHALLENGE[1]=datetime.now()
+		save()
+
+jap_nums={11:'',0:'',1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}
+def numtojap(n):
+	thous,hunds,tens,ons=n//1000,(n%1000)//100,(n%100)//10,n%10
+	if hunds == 1:
+		hunds=11
+	if tens == 1:
+		tens=11
+	res=(thous>0)*('千')+(hunds>0)*(jap_nums[hunds]+'百')+(tens>0)*(jap_nums[tens]+'十')+(ons>0)*jap_nums[ons]
+	if not res:
+		return '零'
+	return res
+	
+
+
 
 def forecast(lvl):
 	latest=DATA[0]['rad'][0].previous_review + Delay[DATA[0]['rad'][0].stage]*3600
@@ -176,22 +200,29 @@ def count_stages(lvl):
 						burn+=1
 	return str(appr),str(guru),str(master),str(enl),str(burn)
 
-def fill_daily_hyes(obj,n=10):
-	if obj.daily_hyes:
-		return obj.daily_hyes
-	if (datetime.now()-CHALLENGE[1]).days>=1:
-		CHALLENGE[0]=0
-		CHALLENGE[1]=datetime.now()
+# def fill_daily_hyes(obj,n=10):
+# 	if obj.daily_hyes:
+# 		return obj.daily_hyes
+# 	if (datetime.now()-CHALLENGE[1]).days>=1:
+# 		CHALLENGE[0]=0
+# 		CHALLENGE[1]=datetime.now()
+# 	hyes=[]
+# 	CHALLENGE[0]=min(CHALLENGE[0],n)
+# 	if CHALLENGE[0]<n:
+# 		for lvl in range(obj.lvl):
+# 			for j in DATA[lvl].values():
+# 				for k in j:
+# 					hyes.append(k)
+# 	n=min(len(hyes),n)
+# 	return [] if not hyes else random.sample(hyes,n)
+def gethye(lvl):
 	hyes=[]
-	CHALLENGE[0]=min(CHALLENGE[0],n)
-	if CHALLENGE[0]<n:
-		for lvl in range(obj.lvl):
-			for j in DATA[lvl].values():
+	for i in range(lvl):
+			for j in DATA[i].values():
 				for k in j:
 					hyes.append(k)
-	n=min(len(hyes),n)
-	return [] if not hyes else random.sample(hyes,n)
-jap_nums={0:'零',1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}
+	return random.choice(hyes)
+
 colors={'rad':(0,163/255,245/255,1),'kan':(252/255,84/255,148/255,1),'voc':(96/255, 0, 144/255,1)}
 class MainApp(MDApp):	
 	lvl=Lvl()
@@ -205,7 +236,7 @@ class MainApp(MDApp):
 	infos=[]
 	refresh_shield=0
 	hye_info=None
-	daily_hyes=[]
+	# daily_hyes=[]
 	hye_challenge=None
 	rand_challenge=None
 
@@ -247,8 +278,9 @@ class MainApp(MDApp):
 		self.theme_cls.primary_palette = "DeepPurple"
 		self.theme_cls.primary_hue='300'
 	def press_challenge_tab(self):
-		if not self.daily_hyes:
-			self.root.ids.play_challenge.text="LET'S CAKE!"
+		# if not self.daily_hyes:
+		# 	self.root.ids.play_challenge.text="LET'S CAKE!"
+		self.play_challenge_button()
 		self.theme_cls.primary_palette = "Indigo"
 		self.theme_cls.primary_hue='400'
 	
@@ -836,9 +868,9 @@ class MainApp(MDApp):
 			self.root.ids.stage_info.text=stage
 	#----------------------------------------------------------------------------------------------
 	def hide_everything_challenge(self):
-		self.root.ids.play_challenge_button.disable=True
-		self.root.ids.play_challenge_button.opacity=0
-		self.root.ids.play_challenge.opacity=0
+		# self.root.ids.play_challenge_button.disable=True
+		# self.root.ids.play_challenge_button.opacity=0
+		# self.root.ids.play_challenge.opacity=0
 		self.root.ids.mdcard_challenge.opacity=0
 		self.root.ids.mdcard_challenge_rad.opacity=0
 		self.root.ids.meaning_reading_challenge.opacity=0
@@ -850,26 +882,27 @@ class MainApp(MDApp):
 		self.root.ids.mdcard_counter_challenge.opacity=0
 	
 	def play_challenge_button(self):
+		updateCHALLENGE()
 		self.root.ids.input_challenge.error=False
-		self.daily_hyes=fill_daily_hyes(self,10)
+		# self.daily_hyes=fill_daily_hyes(self,10)
 		
 		self.hide_everything_challenge()
 		
-		if not self.daily_hyes:
-			self.root.ids.play_challenge.opacity=1
-			self.root.ids.play_challenge_button.opacity=1
-			self.root.ids.play_challenge_button.disabled=False
-			self.root.ids.play_challenge.text='NO CAKES!'
-			return
+		# if not self.daily_hyes:
+		# 	self.root.ids.play_challenge.opacity=1
+		# 	self.root.ids.play_challenge_button.opacity=1
+		# 	self.root.ids.play_challenge_button.disabled=False
+		# 	self.root.ids.play_challenge.text='NO CAKES!'
+		# 	return
 		
 		self.root.ids.mdcard_counter_challenge.opacity=1
-		self.root.ids.mdcard_counter_challenge_text.text=jap_nums[CHALLENGE[0]+1]
+		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
 
 		self.root.ids.meaning_reading_challenge.opacity=1
 		self.root.ids.input_challenge.opacity=1
 		self.root.ids.input_challenge.disabled=False		
 		
-		self.hye_challenge=self.daily_hyes.pop()#!!!
+		self.hye_challenge=gethye(self.lvl)
 
 		self.rand_challenge = 0 if self.hye_challenge.type=='rad' else random.randint(0,1)
 		
@@ -893,6 +926,7 @@ class MainApp(MDApp):
 		self.root.ids.input_challenge.line_color_normal=(1,1,1,1)
 	
 	def press_input_challenge(self):
+		updateCHALLENGE()
 		self.hide_everything_challenge()
 
 		if self.hye_challenge.type=='rad':
@@ -919,7 +953,6 @@ class MainApp(MDApp):
 			self.root.ids.input_challenge.line_color_normal=(130/255,180/255,0/255,1)
 			save()
 		else:
-			self.daily_hyes=[self.hye_challenge]+self.daily_hyes
 			self.root.ids.incorrect_challenge.opacity=1
 			self.root.ids.incorrect_challenge1.opacity=1
 			self.root.ids.input_challenge.line_color_normal=(225/255,0,64/255,1)
