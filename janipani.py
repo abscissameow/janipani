@@ -61,8 +61,6 @@ def numtojap(n):
 	return res
 	
 
-
-
 def forecast(lvl):
 	latest=DATA[0]['rad'][0].previous_review + Delay[DATA[0]['rad'][0].stage]*3600
 	for i in range(lvl):
@@ -789,7 +787,7 @@ class MainApp(MDApp):
 						for hyes in DATA[i].values():
 							for hye in hyes:
 								for meaning in (lambda x: [x] if hye.type=='rad' else x)(hye.meaning):
-									if L[0] in meaning:
+									if self.root.ids.search.text.lower() in meaning:
 										self.infos.append(hye)
 										break
 				else:
