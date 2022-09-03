@@ -1,12 +1,17 @@
+from cgi import test
 from kivy.lang import Builder
 from kivy.clock import Clock
 import random
 from kivymd.app import MDApp
 from wanikani import *
 import pickle, random
+from kivy.core.audio import SoundLoader
+
+TEST=False
 
 def save():
-	# return
+	if TEST:
+		return
 	with open('DATA.pkl', 'wb') as outp:
 		pickle.dump(DATA, outp, pickle.HIGHEST_PROTOCOL)
 	with open('CHALLENGE.pkl', 'wb') as outp:
@@ -15,16 +20,16 @@ def save():
 with open('DATA.pkl', 'rb') as inp:
     DATA=pickle.load(inp)
 
-def reset():
-	for i in range(60):
-		for j in DATA[i].values():
-			for k in j:
-				k.previous_review-=3600*24*60
-				k.stage=-1
-	global CHALLENGE
-	CHALLENGE=[0, datetime.now()]
-	save()
-# # reset() 
+# def reset():
+# 	for i in range(60):
+# 		for j in DATA[i].values():
+# 			for k in j:
+# 				k.previous_review-=3600*24*60
+# 				k.stage=-1
+# 	global CHALLENGE
+# 	CHALLENGE=[0, datetime.now()]
+# 	save()
+# #reset() 
 
 try:
     with open('CHALLENGE.pkl', 'rb') as inp:
@@ -152,6 +157,12 @@ def list_reviews(DATA,lvl,reviews):
 
 def list_lessons(DATA,lvl):
 	L=[]
+	if TEST:
+		for i in DATA[0].values():
+			for j in i:
+				if j.stage==-1 and j.type!='rad':
+					L.append(j)
+		return L
 	for radical in DATA[lvl-1]['rad']:
 		if radical.stage==-1:
 			L.append(radical)
@@ -220,7 +231,8 @@ def gethye(lvl):
 	for i in range(lvl):
 			for j in DATA[i].values():
 				for k in j:
-					hyes.append(k)
+					if k.stage>=0:
+						hyes.append(k)
 	return random.choice(hyes)
 
 colors={'rad':(0,163/255,245/255,1),'kan':(252/255,84/255,148/255,1),'voc':(96/255, 0, 144/255,1)}
@@ -239,6 +251,7 @@ class MainApp(MDApp):
 	# daily_hyes=[]
 	hye_challenge=None
 	rand_challenge=None
+	hye_lesson=None
 
 	def build(self):
 		self.theme_cls.theme_style = "Dark"
@@ -285,6 +298,8 @@ class MainApp(MDApp):
 		self.theme_cls.primary_hue='400'
 	
 	def hide_everything_lesson(self):
+		self.root.ids.lesson_sound.opacity=0
+		self.root.ids.lesson_sound.disabled=True
 		self.root.ids.play_lesson.opacity=0
 		self.root.ids.play_lesson.text=''
 		self.root.ids.next_lesson_button.opacity=0
@@ -295,6 +310,11 @@ class MainApp(MDApp):
 		self.root.ids.mdcard_lesson.opacity=0
 		self.root.ids.play_lesson_button.opacity=0
 		self.root.ids.play_lesson_button.disabled=True
+	
+	def sound_lesson(self):
+		name=self.hye_lesson.link.replace('://','-').replace('/','_')
+		sound = SoundLoader.load('wav/'+name+'.wav')
+		sound.play()
 
 	def press_lesson_cake(self):
 		self.lessons=list_lessons(DATA,self.lvl)
@@ -319,6 +339,12 @@ class MainApp(MDApp):
 		self.root.ids.next_lesson_button.disabled=False
 
 		hye=self.lessons.pop(0)
+
+		if hye.type=='voc':
+			self.root.ids.lesson_sound.opacity=1
+			self.root.ids.lesson_sound.disabled=False
+
+		self.hye_lesson=hye
 		self.root.ids.mdcard_lesson.md_bg_color=colors[hye.type]
 		if hye.type=='rad':
 			self.root.ids.meaning.text = "Meaning: "+hye.meaning
@@ -362,8 +388,9 @@ class MainApp(MDApp):
 			self.root.ids.mdcard_lesson_rad.opacity=0
 			self.root.ids.meaning.text = "Meaning: "+', '.join(hye.meaning)
 			self.root.ids.kun_reading.text="Reading: "+', '.join(hye.reading)
-			self.root.ids.on_reading.font_size=self.root.ids.kun_reading.font_size*0.8
-			self.root.ids.on_reading.text="Example: "+hye.context_sents[0]+f'\n({hye.context_sents[1]})'
+			# self.root.ids.on_reading.font_size=self.root.ids.kun_reading.font_size*0.8
+			# self.root.ids.on_reading.text="Example: "+hye.context_sents[0]+f'\n({hye.context_sents[1]})'
+			self.root.ids.on_reading.text=''
 			self.root.ids.mnemonics_meaning.text=hye.mnemonics_meaning
 			self.root.ids.mnemonics_meaning_ru.text=hye.mnemonics_meaning_ru
 			self.root.ids.mnemonics_reading.text=hye.mnemonics_reading
@@ -377,6 +404,9 @@ class MainApp(MDApp):
 	#----------------------------------------------------------------------------------------------
 	
 	def hide_everything_review(self):
+		self.root.ids.review_sound.opacity=0
+		self.root.ids.review_sound.disabled=True
+
 		self.root.ids.refresh_button.disabled=True
 		self.root.ids.refresh_button.opacity=0
 		self.root.ids.play_review_button.opacity=0
@@ -400,6 +430,11 @@ class MainApp(MDApp):
 		self.root.ids.accordion_review.opacity=0
 		self.root.ids.info_mdcard_review.opacity=0
 		self.root.ids.mdcard_lesson_review.opacity=0
+	
+	def sound_review(self):
+		name=self.hye_review.link.replace('://','-').replace('/','_')
+		sound = SoundLoader.load('wav/'+name+'.wav')
+		sound.play()
 
 	def press_review_cake(self):
 		self.root.ids.refresh_button.icon='refresh'
@@ -485,6 +520,10 @@ class MainApp(MDApp):
 		text=convert_(self.root.ids.input.text.lower(), self.rand).strip()
 		kat=convert_('*'+self.root.ids.input.text.lower(),self.rand).strip()
 		if is_it(text, l, self.rand) or (kat in l):
+			if self.rand and self.hye_review.type=='voc':
+				name=self.hye_review.link.replace('://','-').replace('/','_')
+				sound = SoundLoader.load('wav/'+name+'.wav')
+				sound.play()
 			self.root.ids.correct.opacity=1
 			self.theme_cls.primary_palette = "LightGreen"
 			self.theme_cls.primary_hue='A700'
@@ -571,6 +610,10 @@ class MainApp(MDApp):
 		self.root.ids.next_lesson_review.text=""
 
 		hye=self.hye_review
+		if hye.type=='voc':
+			self.root.ids.review_sound.opacity=1
+			self.root.ids.review_sound.disabled=False
+		
 		self.root.ids.mdcard_lesson_review.md_bg_color=colors[hye.type]
 		if hye.type=='rad':
 			self.root.ids.meaning_review.text = "Meaning: "+hye.meaning
@@ -613,8 +656,9 @@ class MainApp(MDApp):
 			self.root.ids.mdcard_lesson_rad_review.opacity=0
 			self.root.ids.meaning_review.text = "Meaning: "+', '.join(hye.meaning)
 			self.root.ids.kun_reading_review.text="Reading: "+', '.join(hye.reading)
-			self.root.ids.on_reading_review.font_size=self.root.ids.kun_reading.font_size*0.8
-			self.root.ids.on_reading_review.text="Example: "+hye.context_sents[0]+f'\n({hye.context_sents[1]})'
+			# self.root.ids.on_reading_review.font_size=self.root.ids.kun_reading.font_size*0.8
+			# self.root.ids.on_reading_review.text="Example: "+hye.context_sents[0]+f'\n({hye.context_sents[1]})'
+			self.root.ids.on_reading_review.text=''
 			self.root.ids.mnemonics_meaning_review.text=hye.mnemonics_meaning
 			self.root.ids.mnemonics_meaning_ru_review.text=hye.mnemonics_meaning_ru
 			self.root.ids.mnemonics_reading_review.text=hye.mnemonics_reading
@@ -648,6 +692,9 @@ class MainApp(MDApp):
 		self.root.ids.stage_info.opacity=0
 		self.root.ids.stage_info.disabled=True
 		
+		
+		self.root.ids.info_sound.opacity=0
+		self.root.ids.info_sound.disabled=True
 		self.root.ids.info_next.opacity=0
 		self.root.ids.info_next.disabled=True
 		self.root.ids.next_lesson_button_info.opacity=0
@@ -783,6 +830,11 @@ class MainApp(MDApp):
 		self.root.ids.next_lesson_info.text=""
 
 		hye=self.infos.pop(0)
+
+		if hye.type=='voc':
+			self.root.ids.info_sound.opacity=1
+			self.root.ids.info_sound.disabled=False
+
 		self.hye_info=hye
 
 		self.root.ids.stage_info.opacity=1
@@ -832,14 +884,20 @@ class MainApp(MDApp):
 			self.root.ids.mdcard_lesson_rad_info.opacity=0
 			self.root.ids.meaning_info.text = "Meaning: "+', '.join(hye.meaning)
 			self.root.ids.kun_reading_info.text="Reading: "+', '.join(hye.reading)
-			self.root.ids.on_reading_info.font_size=self.root.ids.kun_reading.font_size*0.8
-			self.root.ids.on_reading_info.text="Example: "+hye.context_sents[0]+f'\n({hye.context_sents[1]})'
+			# self.root.ids.on_reading_info.font_size=self.root.ids.kun_reading.font_size*0.8
+			# self.root.ids.on_reading_info.text="Example: "+hye.context_sents[0]+f'\n({hye.context_sents[1]})'
+			self.root.ids.on_reading_info.text=''
 			self.root.ids.mnemonics_meaning_info.text=hye.mnemonics_meaning
 			self.root.ids.mnemonics_meaning_ru_info.text=hye.mnemonics_meaning_ru
 			self.root.ids.mnemonics_reading_info.text=hye.mnemonics_reading
 			self.root.ids.mnemonics_reading_ru_info.text=hye.mnemonics_reading_ru
 			self.root.ids.hyerogliph_lesson_info.text=hye.hyerogliph
 		
+	def sound_info(self):
+		name=self.hye_info.link.replace('://','-').replace('/','_')
+		sound = SoundLoader.load('wav/'+name+'.wav')
+		sound.play()
+
 	def info_next(self):
 		if not self.infos:
 			return
