@@ -16,9 +16,12 @@ def save():
 		pickle.dump(DATA, outp, pickle.HIGHEST_PROTOCOL)
 	with open('CHALLENGE.pkl', 'wb') as outp:
 		pickle.dump(CHALLENGE, outp, pickle.HIGHEST_PROTOCOL)
-
-with open('DATA.pkl', 'rb') as inp:
-    DATA=pickle.load(inp)
+if TEST:
+	with open('DATATEST.pkl', 'rb') as inp:
+		DATA=pickle.load(inp)
+else:
+	with open('DATA.pkl', 'rb') as inp:
+		DATA=pickle.load(inp)
 
 # def reset():
 # 	for i in range(60):
@@ -162,7 +165,7 @@ def list_reviews(DATA,lvl,reviews):
 def list_lessons(DATA,lvl):
 	L=[]
 	if TEST:
-		for i in DATA[0].values():
+		for i in DATA[1].values():
 			for j in i:
 				if j.stage==-1 and j.type!='rad':
 					L.append(j)
@@ -230,14 +233,13 @@ def count_stages(lvl):
 # 					hyes.append(k)
 # 	n=min(len(hyes),n)
 # 	return [] if not hyes else random.sample(hyes,n)
-def gethye(lvl):
+def getvoc(maxlvl,n):
 	hyes=[]
-	for i in range(lvl):
-			for j in DATA[i].values():
-				for k in j:
-					if k.stage>=0:
-						hyes.append(k)
-	return random.choice(hyes)
+	for i in range(maxlvl):
+			for k in DATA[i]['voc']:
+				if k.stage>=0:
+					hyes.append(k)
+	return random.sample(hyes, n)
 
 colors={'rad':(0,163/255,245/255,1),'kan':(252/255,84/255,148/255,1),'voc':(96/255, 0, 144/255,1)}
 class MainApp(MDApp):	
@@ -256,6 +258,8 @@ class MainApp(MDApp):
 	hye_challenge=None
 	rand_challenge=None
 	hye_lesson=None
+	type_challenge=None
+	truebutton=None
 
 	def build(self):
 		self.theme_cls.theme_style = "Dark"
@@ -295,9 +299,14 @@ class MainApp(MDApp):
 		self.theme_cls.primary_palette = "DeepPurple"
 		self.theme_cls.primary_hue='300'
 	def press_challenge_tab(self):
-		# if not self.daily_hyes:
-		# 	self.root.ids.play_challenge.text="LET'S CAKE!"
-		self.play_challenge_button()
+		if self.lvl<2:
+			self.theme_cls.primary_palette = "Indigo"
+			self.theme_cls.primary_hue='400'
+			self.challenge_disable()
+			return
+		self.challenge_enable()
+		if not self.hye_challenge:
+			self.newtask()
 		self.theme_cls.primary_palette = "Indigo"
 		self.theme_cls.primary_hue='400'
 	
@@ -964,109 +973,173 @@ class MainApp(MDApp):
 			self.root.ids.stage_info.text=stage
 	#----------------------------------------------------------------------------------------------
 	def hide_everything_challenge(self):
-		# self.root.ids.play_challenge_button.disable=True
-		# self.root.ids.play_challenge_button.opacity=0
-		# self.root.ids.play_challenge.opacity=0
-		self.root.ids.mdcard_challenge.opacity=0
-		self.root.ids.mdcard_challenge_rad.opacity=0
-		self.root.ids.meaning_reading_challenge.opacity=0
-		# self.root.ids.correct_challenge.opacity=0
-		# self.root.ids.correct_challenge1.opacity=0
-		self.root.ids.input_challenge.opacity=0
-		self.root.ids.input_challenge.disabled=True
+		self.root.ids.mdcard_meaning_reading_challenge.opacity=0
+
+		self.root.ids.challenge_sound.opacity=0
+		self.root.ids.challenge_sound.disabled=True
+	
+	def challenge_disable(self):
+		self.root.ids.challenge_sound.opacity=0
+		self.root.ids.challenge_sound.disabled=True
+
+		self.root.ids.mdcard_meaning_reading_challenge.opacity=1
+		self.root.ids.meaning_reading_challenge.text='LOCKED\n(get lvl 2 to unlock)'
+		self.root.ids.meaning_reading_challenge.font_size=40
+		self.root.ids.mdcard_meaning_reading_challenge.pos_hint['center_y']=0.5
 
 		self.root.ids.mdcard_counter_challenge.opacity=0
+
+		self.root.ids.button_challenge1.opacity=0
+		self.root.ids.button_challenge1.disabled=True
+		self.root.ids.button_challenge2.opacity=0
+		self.root.ids.button_challenge2.disabled=True
+		self.root.ids.button_challenge3.opacity=0
+		self.root.ids.button_challenge3.disabled=True
+		self.root.ids.button_challenge4.opacity=0
+		self.root.ids.button_challenge4.disabled=True
 	
-	def play_challenge_button(self):
-		updateCHALLENGE()
-		self.root.ids.input_challenge.error=False
-		# self.daily_hyes=fill_daily_hyes(self,10)
-		
-		self.hide_everything_challenge()
-		
-		# if not self.daily_hyes:
-		# 	self.root.ids.play_challenge.opacity=1
-		# 	self.root.ids.play_challenge_button.opacity=1
-		# 	self.root.ids.play_challenge_button.disabled=False
-		# 	self.root.ids.play_challenge.text='NO CAKES!'
-		# 	return
-		
+	def challenge_enable(self):
 		self.root.ids.mdcard_counter_challenge.opacity=1
-		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
+		self.root.ids.meaning_reading_challenge.font_size=60
+		self.root.ids.mdcard_meaning_reading_challenge.pos_hint['center_y']=.7
 
-		self.root.ids.meaning_reading_challenge.opacity=1
-		self.root.ids.input_challenge.opacity=1
-		self.root.ids.input_challenge.disabled=False		
+		self.root.ids.button_challenge1.opacity=1
+		self.root.ids.button_challenge1.disabled=False
+		self.root.ids.button_challenge2.opacity=1
+		self.root.ids.button_challenge2.disabled=False
+		self.root.ids.button_challenge3.opacity=1
+		self.root.ids.button_challenge3.disabled=False
+		self.root.ids.button_challenge4.opacity=1
+		self.root.ids.button_challenge4.disabled=False
 		
-		self.hye_challenge=gethye(self.lvl)
 
-		self.rand_challenge = 0 if self.hye_challenge.type=='rad' else random.randint(0,1)
-		
-		self.root.ids.meaning_reading_challenge.text=randdict[self.rand_challenge]
-		self.root.ids.mdcard_challenge.md_bg_color=colors[self.hye_challenge.type]
-		self.root.ids.mdcard_challenge_rad.md_bg_color=colors[self.hye_challenge.type]
-		if not self.hye_challenge.hyerogliph:
-			self.root.ids.rad_pic_challenge.source=self.hye_challenge.pic_path
-			self.root.ids.mdcard_challenge_rad.opacity=1
-			self.root.ids.mdcard_challenge.opacity=0
+	
+	def newtask(self):
+		self.hide_everything_challenge()
+		self.root.ids.mdcard_counter_challenge_text.text=str(CHALLENGE[0])
+		dice=random.randint(1,5)
+		self.type_challenge=2 if dice == 1 else 3 if dice <= 3 else 1 
+
+		self.hye_challenge=getvoc(self.lvl,1)[0]
+		a,b,c=getvoc(self.lvl,3)
+		self.truebutton=random.randint(1,4)
+		if self.type_challenge==1:#reading->meaning?
+			self.root.ids.mdcard_meaning_reading_challenge.opacity=1
+			self.root.ids.meaning_reading_challenge.text=self.hye_challenge.reading[0]
+			meanings=[a.meaning[0],b.meaning[0],c.meaning[0]]
+			while self.hye_challenge.meaning[0] in meanings or len(set(meanings))<3:
+				a,b,c=getvoc(self.lvl,3)
+				meanings=[a.meaning[0],b.meaning[0],c.meaning[0]]
+			if self.truebutton==1:
+				self.root.ids.button_challenge1.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge2.text=meanings[0]
+				self.root.ids.button_challenge3.text=meanings[1]
+				self.root.ids.button_challenge4.text=meanings[2]
+			elif self.truebutton==2:
+				self.root.ids.button_challenge2.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge1.text=meanings[0]
+				self.root.ids.button_challenge3.text=meanings[1]
+				self.root.ids.button_challenge4.text=meanings[2]
+			elif self.truebutton==3:
+				self.root.ids.button_challenge3.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge1.text=meanings[0]
+				self.root.ids.button_challenge2.text=meanings[1]
+				self.root.ids.button_challenge4.text=meanings[2]
+			elif self.truebutton==4:
+				self.root.ids.button_challenge4.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge1.text=meanings[0]
+				self.root.ids.button_challenge2.text=meanings[1]
+				self.root.ids.button_challenge3.text=meanings[2]
+		elif self.type_challenge==2:#meaning->hye?
+			self.root.ids.mdcard_meaning_reading_challenge.opacity=1
+			self.root.ids.meaning_reading_challenge.text=self.hye_challenge.meaning[0]
+			hyes=[a.hyerogliph,b.hyerogliph,c.hyerogliph]
+			while self.hye_challenge.hyerogliph in hyes or len(set(hyes))<3:
+				a,b,c=getvoc(self.lvl,3)
+				hyes=[a.hyerogliph,b.hyerogliph,c.hyerogliph]
+			if self.truebutton==1:
+				self.root.ids.button_challenge1.text=self.hye_challenge.hyerogliph
+				self.root.ids.button_challenge2.text=hyes[0]
+				self.root.ids.button_challenge3.text=hyes[1]
+				self.root.ids.button_challenge4.text=hyes[2]
+			elif self.truebutton==2:
+				self.root.ids.button_challenge2.text=self.hye_challenge.hyerogliph
+				self.root.ids.button_challenge1.text=hyes[0]
+				self.root.ids.button_challenge3.text=hyes[1]
+				self.root.ids.button_challenge4.text=hyes[2]
+			elif self.truebutton==3:
+				self.root.ids.button_challenge3.text=self.hye_challenge.hyerogliph
+				self.root.ids.button_challenge1.text=hyes[0]
+				self.root.ids.button_challenge2.text=hyes[1]
+				self.root.ids.button_challenge4.text=hyes[2]
+			elif self.truebutton==4:
+				self.root.ids.button_challenge4.text=self.hye_challenge.hyerogliph
+				self.root.ids.button_challenge1.text=hyes[0]
+				self.root.ids.button_challenge2.text=hyes[1]
+				self.root.ids.button_challenge3.text=hyes[2]
+		else:#sound_reading->meaning?
+			self.root.ids.challenge_sound.opacity=1
+			self.root.ids.challenge_sound.disabled=False
+			meanings=[a.meaning[0],b.meaning[0],c.meaning[0]]
+			while self.hye_challenge.meaning[0] in meanings or len(set(meanings))<3:
+				a,b,c=getvoc(self.lvl,3)
+				meanings=[a.meaning[0],b.meaning[0],c.meaning[0]]
+			if self.truebutton==1:
+				self.root.ids.button_challenge1.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge2.text=meanings[0]
+				self.root.ids.button_challenge3.text=meanings[1]
+				self.root.ids.button_challenge4.text=meanings[2]
+			elif self.truebutton==2:
+				self.root.ids.button_challenge2.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge1.text=meanings[0]
+				self.root.ids.button_challenge3.text=meanings[1]
+				self.root.ids.button_challenge4.text=meanings[2]
+			elif self.truebutton==3:
+				self.root.ids.button_challenge3.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge1.text=meanings[0]
+				self.root.ids.button_challenge2.text=meanings[1]
+				self.root.ids.button_challenge4.text=meanings[2]
+			elif self.truebutton==4:
+				self.root.ids.button_challenge4.text=self.hye_challenge.meaning[0]
+				self.root.ids.button_challenge1.text=meanings[0]
+				self.root.ids.button_challenge2.text=meanings[1]
+				self.root.ids.button_challenge3.text=meanings[2]
+
+	def challenge_sound(self):
+		name=self.hye_challenge.link.replace('://','-').replace('/','_')
+		sound = SoundLoader.load('wav/'+name+'.wav')
+		sound.play()
+
+	def button_challenge(self,n):
+		updateCHALLENGE()
+		if self.truebutton == n:
+			self.correct_challenge()
 		else:
-			self.root.ids.hyerogliph_challenge.text=self.hye_challenge.hyerogliph
-			self.root.ids.mdcard_challenge_rad.opacity=0
-			self.root.ids.mdcard_challenge.opacity=1
+			self.incorrect_challenge()
+		self.newtask()
+	
+	def correct_challenge(self):
+		CHALLENGE[0]+=1
+		CHALLENGE[1]=datetime.now()
+		self.root.ids.mdcard_counter_challenge_text.text=str(CHALLENGE[0])
+		self.root.ids.correct_challenge.opacity=1
+		self.root.ids.correct_challenge1.opacity=1
+		save()
+		Clock.schedule_once(self.correct_challenge1, 1.1)
+	def incorrect_challenge(self):
+		CHALLENGE[0]-=1
+		CHALLENGE[1]=datetime.now()
+		self.root.ids.mdcard_counter_challenge_text.text=str(CHALLENGE[0])
+		self.root.ids.incorrect_challenge.opacity=1
+		self.root.ids.incorrect_challenge1.opacity=1
+		save()
+		Clock.schedule_once(self.correct_challenge1, 1.1)
+		
 
-	def correct_challenge(self,dt):
+	def correct_challenge1(self,dt):
 		self.root.ids.correct_challenge.opacity=0
 		self.root.ids.correct_challenge1.opacity=0
 		self.root.ids.incorrect_challenge.opacity=0
 		self.root.ids.incorrect_challenge1.opacity=0
-		self.root.ids.input_challenge.line_color_normal=(1,1,1,1)
-	
-	def press_input_challenge(self):
-		updateCHALLENGE()
-		self.hide_everything_challenge()
-
-		if self.hye_challenge.type=='rad':
-			l=[self.hye_challenge.meaning]
-		elif not self.rand_challenge:
-			l=self.hye_challenge.meaning
-		elif self.hye_challenge.type=='kan':
-			if self.hye_challenge.main_reading=='kun':
-				l=self.hye_challenge.kun_reading
-			elif self.hye_challenge.main_reading=='on':
-				l=self.hye_challenge.on_reading
-			else:
-				l=[self.hye_challenge.main_reading[8:]]
-		else:
-			l=self.hye_challenge.reading
-		
-		text=convert_(self.root.ids.input_challenge.text.lower(), self.rand_challenge).strip()
-		kat=convert_('*'+self.root.ids.input_challenge.text.lower(),self.rand_challenge).strip()
-		if is_it(text, l, self.rand_challenge) or (kat in l):
-			CHALLENGE[0]+=1
-			CHALLENGE[1]=datetime.now()
-			self.root.ids.correct_challenge.opacity=1
-			self.root.ids.correct_challenge1.opacity=1
-			self.root.ids.input_challenge.line_color_normal=(130/255,180/255,0/255,1)
-			save()
-		else:
-			self.root.ids.incorrect_challenge.opacity=1
-			self.root.ids.incorrect_challenge1.opacity=1
-			self.root.ids.input_challenge.line_color_normal=(225/255,0,64/255,1)
-		
-		Clock.schedule_once(self.correct_challenge, 1.1)
-		self.root.ids.input_challenge.text=''
-		self.play_challenge_button()
-
-
-
-
-		
-
 
 MainApp().run()
-
-
-
-
-
-
