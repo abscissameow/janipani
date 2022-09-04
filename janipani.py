@@ -38,6 +38,12 @@ except:
 	CHALLENGE=[0, datetime.now()]
 	save()
 
+def inlatin(word):
+	for i in word:
+		if (i<'a' or i>'z') and (i<'0' or i>'9'):
+			return False
+	return True
+
 def updateCHALLENGE():
 	global CHALLENGE
 	date_format = "%m/%d/%Y"
@@ -783,21 +789,55 @@ class MainApp(MDApp):
 				elif L[0]=='lvl':
 					self.infos=[item for sublist in DATA[int(L[1])-1].values() for item in sublist]
 				elif L[0] not in ['rad','kan','voc']:
-					for i in range(60):
-						for hyes in DATA[i].values():
-							for hye in hyes:
-								for meaning in (lambda x: [x] if hye.type=='rad' else x)(hye.meaning):
-									if self.root.ids.search.text.lower() in meaning:
-										self.infos.append(hye)
-										break
+					if inlatin(self.root.ids.search.text.lower()):
+						for i in range(60):
+							for hyes in DATA[i].values():
+								for hye in hyes:
+									for meaning in (lambda x: [x] if hye.type=='rad' else x)(hye.meaning):
+										if self.root.ids.search.text.lower() in meaning:
+											self.infos.append(hye)
+											break
+					else:
+						for i in range(60):
+							for hyes in DATA[i].values():
+								for hye in hyes:
+									if hye.type=='rad':
+										continue
+									if hye.type=='voc':
+										for reading in hye.reading:
+											if self.root.ids.search.text in reading:
+												self.infos.append(hye)
+												break
+									else:
+										for reading in (hye.on_reading+hye.kun_reading):
+											if reading and (self.root.ids.search.text in reading):
+												self.infos.append(hye)
+												break
+
 				else:
 					type,text = L
-					for i in range(60):
-						for hye in DATA[i][type]:
-							for meaning in (lambda x: [x] if type=='rad' else x)(hye.meaning):
-								if text in meaning:
-									self.infos.append(hye)
-									break
+					if inlatin(text):
+						for i in range(60):
+							for hye in DATA[i][type]:
+								for meaning in (lambda x: [x] if type=='rad' else x)(hye.meaning):
+									if text in meaning:
+										self.infos.append(hye)
+										break
+					else:
+						for i in range(60):
+							for hye in DATA[i][type]:
+								if hye.type=='rad':
+									continue
+								if hye.type=='voc':
+									for reading in hye.reading:
+										if text in reading:
+											self.infos.append(hye)
+											break
+								else:
+									for reading in (hye.on_reading+hye.kun_reading):
+										if reading and (text in reading):
+											self.infos.append(hye)
+											break
 				if not self.infos:
 					self.root.ids.search.current_hint_text_color=(225/255,0,64/255,1)
 					self.root.ids.search.hint_text=f"  couldn't find relevant: '{self.root.ids.search.text}'"
