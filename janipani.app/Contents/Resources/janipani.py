@@ -1017,7 +1017,7 @@ class MainApp(MDApp):
 	def newtask(self):
 		self.hide_everything_challenge()
 		self.root.ids.mdcard_counter_challenge_text.text=str(CHALLENGE[0])
-		dice=random.randint(1,5)
+		dice=random.randint(1,6)
 		self.type_challenge=2 if dice == 1 else 3 if dice <= 3 else 1 
 
 		self.hye_challenge=getvoc(self.lvl,1)[0]
