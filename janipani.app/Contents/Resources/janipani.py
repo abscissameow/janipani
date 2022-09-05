@@ -43,7 +43,7 @@ except:
 
 def inlatin(word):
 	for i in word:
-		if (i<'a' or i>'z') and (i<'0' or i>'9'):
+		if (i<'a' or i>'z') and (i<'0' or i>'9') and (i!=' '):
 			return False
 	return True
 
@@ -59,15 +59,19 @@ def updateCHALLENGE():
 
 jap_nums={11:'',0:'',1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}
 def numtojap(n):
+	sign = '-' if n<0 else ''
+	n=abs(n)
 	thous,hunds,tens,ons=n//1000,(n%1000)//100,(n%100)//10,n%10
 	if hunds == 1:
 		hunds=11
 	if tens == 1:
 		tens=11
-	res=(thous>0)*('千')+(hunds>0)*(jap_nums[hunds]+'百')+(tens>0)*(jap_nums[tens]+'十')+(ons>0)*jap_nums[ons]
+	if thous == 1:
+		thous=11
+	res=(thous>0)*(jap_nums[thous]+'千')+(hunds>0)*(jap_nums[hunds]+'百')+(tens>0)*(jap_nums[tens]+'十')+(ons>0)*jap_nums[ons]
 	if not res:
 		return '零'
-	return res
+	return sign+res
 	
 
 def forecast(lvl):
@@ -1016,7 +1020,7 @@ class MainApp(MDApp):
 	
 	def newtask(self):
 		self.hide_everything_challenge()
-		self.root.ids.mdcard_counter_challenge_text.text=str(CHALLENGE[0])
+		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
 		dice=random.randint(1,6)
 		self.type_challenge=2 if dice == 1 else 3 if dice <= 3 else 1 
 
@@ -1121,7 +1125,7 @@ class MainApp(MDApp):
 	def correct_challenge(self):
 		CHALLENGE[0]+=1
 		CHALLENGE[1]=datetime.now()
-		self.root.ids.mdcard_counter_challenge_text.text=str(CHALLENGE[0])
+		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
 		self.root.ids.correct_challenge.opacity=1
 		self.root.ids.correct_challenge1.opacity=1
 		save()
@@ -1129,7 +1133,7 @@ class MainApp(MDApp):
 	def incorrect_challenge(self):
 		CHALLENGE[0]-=1
 		CHALLENGE[1]=datetime.now()
-		self.root.ids.mdcard_counter_challenge_text.text=str(CHALLENGE[0])
+		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
 		self.root.ids.incorrect_challenge.opacity=1
 		self.root.ids.incorrect_challenge1.opacity=1
 		save()
