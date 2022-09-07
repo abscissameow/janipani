@@ -543,7 +543,7 @@ class MainApp(MDApp):
 				sound.play()
 			if not self.rand and self.hye_review.type=='voc':
 				if self.hye_review.link=='http://wanikani.com/vocabulary/%E4%B8%96':
-					sound = SoundLoader.load('EXTRA/'+'THE_WORLD'+'.wav')
+					sound = SoundLoader.load('EXTRA/'+'THE WORLD'+'.wav')
 					sound.play()
 
 			self.root.ids.correct.opacity=1
@@ -764,7 +764,17 @@ class MainApp(MDApp):
 					return
 				self.infos=[]
 				L=self.root.ids.search.text.lower().split(' ',1)
-				if L[0]=='_spread':
+				
+				if L[0]=='_review':
+					lvl,type,hye=L[1].split(' ')
+					for i in DATA[int(lvl)-1][type]:
+						if hye in i.meaning:
+							i.previous_review=time.time()-10000*3600
+							save()
+							self.root.ids.search.text+=' done'
+							return
+
+				elif L[0]=='_spread':
 					t=time.time()
 					delta=int(L[1])
 					for i in range(self.lvl):
