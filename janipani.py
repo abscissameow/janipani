@@ -541,6 +541,11 @@ class MainApp(MDApp):
 				name=self.hye_review.link.replace('://','-').replace('/','_')
 				sound = SoundLoader.load('wav/'+name+'.wav')
 				sound.play()
+			if not self.rand and self.hye_review.type=='voc':
+				if self.hye_review.link=='http://wanikani.com/vocabulary/%E4%B8%96':
+					sound = SoundLoader.load('EXTRA/'+'THE_WORLD'+'.wav')
+					sound.play()
+
 			self.root.ids.correct.opacity=1
 			self.theme_cls.primary_palette = "LightGreen"
 			self.theme_cls.primary_hue='A700'
