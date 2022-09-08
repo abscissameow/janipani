@@ -545,6 +545,9 @@ class MainApp(MDApp):
 				if self.hye_review.link=='http://wanikani.com/vocabulary/%E4%B8%96':
 					sound = SoundLoader.load('EXTRA/'+'THE WORLD'+'.wav')
 					sound.play()
+				elif self.hye_review.link=='http://wanikani.com/vocabulary/%E9%87%91':
+					sound = SoundLoader.load('EXTRA/'+'GOLD EXPERIENCE'+'.wav')
+					sound.play()
 
 			self.root.ids.correct.opacity=1
 			self.theme_cls.primary_palette = "LightGreen"
