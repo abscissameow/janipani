@@ -504,8 +504,10 @@ class MainApp(MDApp):
 	
 	def correct(self,dt):
 		self.root.ids.correct.opacity=0
-		self.theme_cls.primary_palette = "Cyan"
-		self.theme_cls.primary_hue='500'
+		self.root.ids.surrender_review_button.md_bg_color=self.theme_cls.primary_color
+		self.root.ids.refresh_button.md_bg_color=self.theme_cls.primary_color
+		# self.theme_cls.primary_palette = "Cyan"
+		# self.theme_cls.primary_hue='500'
 		self.root.ids.input.line_color_normal=(1,1,1,1)
 
 
@@ -550,8 +552,10 @@ class MainApp(MDApp):
 					sound.play()
 
 			self.root.ids.correct.opacity=1
-			self.theme_cls.primary_palette = "LightGreen"
-			self.theme_cls.primary_hue='A700'
+			# self.theme_cls.primary_palette = "LightGreen"
+			# self.theme_cls.primary_hue='A700'
+			self.root.ids.surrender_review_button.md_bg_color=(0,226/255,0,1)
+			self.root.ids.refresh_button.md_bg_color=(0,226/255,0,1)
 			self.root.ids.input.line_color_normal=(0,226/255,0,1)
 			Clock.schedule_once(self.correct, 1.1)
 			exec('self.hye_review.ind_'+randdict[self.rand]+'=1')
