@@ -57,6 +57,11 @@ def updateCHALLENGE():
 		CHALLENGE[1]=datetime.now()
 		save()
 
+EXTRA=['http://wanikani.com/vocabulary/%E4%B8%96','http://wanikani.com/vocabulary/%E9%87%91']
+
+def EXTRAsound(hye):
+	SoundLoader.load('EXTRA/'+hye.link.replace('://','-').replace('/','_')+'.wav').play()
+
 jap_nums={11:'',0:'',1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}
 def numtojap(n):
 	sign = '-' if n<0 else ''
@@ -329,7 +334,7 @@ class MainApp(MDApp):
 		self.root.ids.play_lesson_button.disabled=True
 	
 	def sound_lesson(self):
-		name=self.hye_lesson.link.replace('://','-').replace('/','_')
+		name=self.hye_lesson.linkc
 		sound = SoundLoader.load('wav/'+name+'.wav')
 		sound.play()
 
@@ -543,13 +548,14 @@ class MainApp(MDApp):
 				name=self.hye_review.link.replace('://','-').replace('/','_')
 				sound = SoundLoader.load('wav/'+name+'.wav')
 				sound.play()
-			if not self.rand and self.hye_review.type=='voc':
-				if self.hye_review.link=='http://wanikani.com/vocabulary/%E4%B8%96':
-					sound = SoundLoader.load('EXTRA/'+'THE WORLD'+'.wav')
-					sound.play()
-				elif self.hye_review.link=='http://wanikani.com/vocabulary/%E9%87%91':
-					sound = SoundLoader.load('EXTRA/'+'GOLD EXPERIENCE'+'.wav')
-					sound.play()
+			if not self.rand and self.hye_link in EXTRA:
+				EXTRAsound(self.hye_review)
+				# if self.hye_review.link=='http://wanikani.com/vocabulary/%E4%B8%96':
+				# 	sound = SoundLoader.load('EXTRA/'+'THE WORLD'+'.wav')
+				# 	sound.play()
+				# elif self.hye_review.link=='http://wanikani.com/vocabulary/%E9%87%91':
+				# 	sound = SoundLoader.load('EXTRA/'+'GOLD EXPERIENCE'+'.wav')
+				# 	sound.play()
 
 			self.root.ids.correct.opacity=1
 			# self.theme_cls.primary_palette = "LightGreen"
@@ -967,6 +973,11 @@ class MainApp(MDApp):
 			self.root.ids.hyerogliph_lesson_info.text=hye.hyerogliph
 		
 	def sound_info(self):
+		if self.hye_info.link in EXTRA:
+			rand=random.randint(0,2)
+			if not rand:
+				EXTRAsound(self.hye_info)
+				return
 		name=self.hye_info.link.replace('://','-').replace('/','_')
 		sound = SoundLoader.load('wav/'+name+'.wav')
 		sound.play()
