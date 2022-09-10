@@ -546,9 +546,8 @@ class MainApp(MDApp):
 		if is_it(text, l, self.rand) or (kat in l):
 			if self.rand and self.hye_review.type=='voc':
 				name=self.hye_review.link.replace('://','-').replace('/','_')
-				sound = SoundLoader.load('wav/'+name+'.wav')
-				sound.play()
-			if not self.rand and self.hye_link in EXTRA:
+				SoundLoader.load('wav/'+name+'.wav').play()
+			if (not self.rand) and self.hye_review.type=='voc' and (self.hye_review.link in EXTRA):
 				EXTRAsound(self.hye_review)
 				# if self.hye_review.link=='http://wanikani.com/vocabulary/%E4%B8%96':
 				# 	sound = SoundLoader.load('EXTRA/'+'THE WORLD'+'.wav')
