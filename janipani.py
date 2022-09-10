@@ -57,10 +57,15 @@ def updateCHALLENGE():
 		CHALLENGE[1]=datetime.now()
 		save()
 
-EXTRA=['http://wanikani.com/vocabulary/%E4%B8%96','http://wanikani.com/vocabulary/%E9%87%91']
+# world4,nani5,god11,no33,muda50
+EXTRA=['http://wanikani.com/vocabulary/%E4%B8%96','http://wanikani.com/vocabulary/%E4%BD%95','http://wanikani.com/vocabulary/%E7%A5%9E','http://wanikani.com/vocabulary/%E5%90%A6','http://wanikani.com/vocabulary/%E7%84%A1%E9%A7%84']
+# jojo53
+EXTRA_READING=['http://wanikani.com/vocabulary/%E5%BE%90%E3%80%85']
 
 def EXTRAsound(hye):
 	SoundLoader.load('EXTRA/'+hye.link.replace('://','-').replace('/','_')+'.wav').play()
+def EXTRA_READINGsound(hye):
+	SoundLoader.load('EXTRA_READING/'+hye.link.replace('://','-').replace('/','_')+'.wav').play()
 
 jap_nums={11:'',0:'',1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}
 def numtojap(n):
@@ -544,11 +549,15 @@ class MainApp(MDApp):
 		text=convert_(self.root.ids.input.text.lower(), self.rand).strip()
 		kat=convert_('*'+self.root.ids.input.text.lower(),self.rand).strip()
 		if is_it(text, l, self.rand) or (kat in l):
-			if self.rand and self.hye_review.type=='voc':
-				name=self.hye_review.link.replace('://','-').replace('/','_')
-				SoundLoader.load('wav/'+name+'.wav').play()
 			if (not self.rand) and self.hye_review.type=='voc' and (self.hye_review.link in EXTRA):
 				EXTRAsound(self.hye_review)
+			elif self.rand and self.hye_review.type=='voc' and (self.hye_review.link in EXTRA_READING):
+				EXTRA_READINGsound(self.hye_review)
+			elif self.rand and self.hye_review.type=='voc':
+				name=self.hye_review.link.replace('://','-').replace('/','_')
+				SoundLoader.load('wav/'+name+'.wav').play()
+			
+
 				# if self.hye_review.link=='http://wanikani.com/vocabulary/%E4%B8%96':
 				# 	sound = SoundLoader.load('EXTRA/'+'THE WORLD'+'.wav')
 				# 	sound.play()
@@ -976,6 +985,11 @@ class MainApp(MDApp):
 			rand=random.randint(0,2)
 			if not rand:
 				EXTRAsound(self.hye_info)
+				return
+		elif self.hye_info.link in EXTRA_READING:
+			rand=random.randint(0,2)
+			if not rand:
+				EXTRA_READINGsound(self.hye_info)
 				return
 		name=self.hye_info.link.replace('://','-').replace('/','_')
 		sound = SoundLoader.load('wav/'+name+'.wav')
