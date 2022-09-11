@@ -57,10 +57,10 @@ def updateCHALLENGE():
 		CHALLENGE[1]=datetime.now()
 		save()
 
-# world4,god11,no33,muda50
-EXTRA=['http://wanikani.com/vocabulary/%E4%B8%96','http://wanikani.com/vocabulary/%E7%A5%9E','http://wanikani.com/vocabulary/%E5%90%A6','http://wanikani.com/vocabulary/%E7%84%A1%E9%A7%84']
-# nani5,jojo53
-EXTRA_READING=['http://wanikani.com/vocabulary/%E4%BD%95','http://wanikani.com/vocabulary/%E5%BE%90%E3%80%85']
+# world4,god11,no33
+EXTRA=['http://wanikani.com/vocabulary/%E4%B8%96','http://wanikani.com/vocabulary/%E7%A5%9E','http://wanikani.com/vocabulary/%E5%90%A6']
+# nani5,muda50,jojo53
+EXTRA_READING=['http://wanikani.com/vocabulary/%E4%BD%95','http://wanikani.com/vocabulary/%E5%BE%90%E3%80%85','http://wanikani.com/vocabulary/%E7%84%A1%E9%A7%84']
 
 def EXTRAsound(hye):
 	SoundLoader.load('EXTRA/'+hye.link.replace('://','-').replace('/','_')+'.wav').play()
