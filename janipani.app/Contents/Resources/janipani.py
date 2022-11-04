@@ -67,6 +67,7 @@ def EXTRAsound(hye):
 def EXTRA_READINGsound(hye):
 	SoundLoader.load('EXTRA_READING/'+hye.link.replace('://','-').replace('/','_')+'.wav').play()
 
+transdict = dict(zip('йцукенгшщзфывапролдячсмить','qwertyuiopasdfghjklzxcvbnm'))
 jap_nums={11:'',0:'',1:'一',2:'二',3:'三',4:'四',5:'五',6:'六',7:'七',8:'八',9:'九',10:'十'}
 def numtojap(n):
 	sign = '-' if n<0 else ''
@@ -268,12 +269,39 @@ class MainApp(MDApp):
 	infos=[]
 	refresh_shield=0
 	hye_info=None
-	# daily_hyes=[]
 	hye_challenge=None
 	rand_challenge=None
 	hye_lesson=None
 	type_challenge=None
 	truebutton=None
+
+	def tune(self, text):
+		# return text
+		text=text.lower()
+		newtext = ''
+		for letter in text:
+			if letter in 'йцукенгшщзфывапролдячсмить':
+				newtext += transdict[letter]
+			else:
+				newtext += letter
+		if not self.rand:
+			return newtext
+		supernewtext = ''
+		fignya = ''
+		for letter in newtext:
+			if letter in 'しょしゅべがぎゅろじょぼおひょんやはさぱひゃほげたけりごひゅぜなぴょぴゅるぴゃもきゅめいびょすぐじゃじゅぬねにゅぴへとぷみゅゆぎゃちにょのにかしこだりゃちょっぽぎょそあをらどれびゅぺえふきょびびゃちゅぎちゃみゃきゃりゅぞてざうずでよぶみせりょしゃわにゃむばゔきひつまくじみょ' or letter==' ':
+				supernewtext += letter
+			else:
+				fignya+=letter
+		if supernewtext+fignya!=newtext:
+			return newtext
+
+		if (gg:=convert_(fignya,1)) not in ['', 'ん']:
+			if gg == 'んん':
+				gg='ん'
+			return supernewtext+gg
+		return supernewtext+fignya
+
 
 	def build(self):
 		self.theme_cls.theme_style = "Dark"
@@ -606,7 +634,7 @@ class MainApp(MDApp):
 				return
 			
 			if (self.root.ids.input.text.lower() in n) or (convert_(self.root.ids.input.text.lower(),not self.rand) in n):
-				self.root.ids.meaning_reading.text = f"oops! I am looking for {randdict[self.rand].capitalize()}!"
+				self.root.ids.meaning_reading.text = f"oops! I am looking for {isreading[self.rand].capitalize()}!"
 				self.root.ids.input.text=''
 				return
 			self.root.ids.input.error_color= (225/255,0,64/255,1)
