@@ -574,7 +574,7 @@ class MainApp(MDApp):
 			self.root.ids.surrender_review_button.md_bg_color=(0,226/255,0,1)
 			self.root.ids.refresh_button.md_bg_color=(0,226/255,0,1)
 			self.root.ids.input.line_color_normal=(0,226/255,0,1)
-			Clock.schedule_once(self.correct, 1.1)
+			Clock.schedule_once(self.correct, 0.8)
 			exec('self.hye_review.ind_'+randdict[self.rand]+'=1')
 			mult=0.9
 			if self.hye_review.ind_meaning and self.hye_review.ind_reading:
@@ -1178,7 +1178,7 @@ class MainApp(MDApp):
 		self.root.ids.correct_challenge.opacity=1
 		self.root.ids.correct_challenge1.opacity=1
 		save()
-		Clock.schedule_once(self.correct_challenge1, 1.1)
+		Clock.schedule_once(self.correct_challenge1, 0.8)
 	def incorrect_challenge(self):
 		CHALLENGE[0]-=1
 		CHALLENGE[1]=datetime.now()
@@ -1186,7 +1186,7 @@ class MainApp(MDApp):
 		self.root.ids.incorrect_challenge.opacity=1
 		self.root.ids.incorrect_challenge1.opacity=1
 		save()
-		Clock.schedule_once(self.correct_challenge1, 1.1)
+		Clock.schedule_once(self.correct_challenge1, 0.8)
 		
 
 	def correct_challenge1(self,dt):
