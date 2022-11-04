@@ -501,6 +501,7 @@ class MainApp(MDApp):
 			self.rand = 0
 		
 		self.root.ids.meaning_reading.text=randdict[self.rand]
+		self.root.ids.input.focus = True
 		self.root.ids.mdcard_review.md_bg_color=colors[self.hye_review.type]
 		self.root.ids.mdcard_review_rad.md_bg_color=colors[self.hye_review.type]
 		if not self.hye_review.hyerogliph:
@@ -519,9 +520,11 @@ class MainApp(MDApp):
 		# self.theme_cls.primary_palette = "Cyan"
 		# self.theme_cls.primary_hue='500'
 		self.root.ids.input.line_color_normal=(1,1,1,1)
+		self.root.ids.input.focus = True
 
 
 	def press_input(self):
+		self.root.ids.input.focus = True
 		self.refresh_shield=0
 		# self.root.ids.input.helper_text=''
 		if 'NOOO! not' in self.root.ids.input.text:
