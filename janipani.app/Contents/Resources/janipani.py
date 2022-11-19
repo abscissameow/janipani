@@ -555,7 +555,7 @@ class MainApp(MDApp):
 		self.root.ids.input.focus = True
 		self.refresh_shield=0
 		# self.root.ids.input.helper_text=''
-		if 'NOOO! not' in self.root.ids.input.text:
+		if 'nooo! not' in self.root.ids.input.text:
 			self.root.ids.input.text=''
 			self.root.ids.input.error=False
 			self.press_review_cake()
@@ -642,7 +642,7 @@ class MainApp(MDApp):
 			self.Wrongs_count[self.hye_review]=self.Wrongs_count.get(self.hye_review,0)+1
 			self.root.ids.input.error=True
 			self.root.ids.input.helper_text=''
-			self.root.ids.input.text=f'NOOO! not {convert_(self.root.ids.input.text.lower(),self.rand)}!'
+			self.root.ids.input.text=f'nooo! not {convert_(self.root.ids.input.text.lower(),self.rand)}!'
 			return
 		self.root.ids.input.text=''
 		self.press_review_cake()
