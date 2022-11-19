@@ -634,7 +634,7 @@ class MainApp(MDApp):
 				return
 			
 			if (self.root.ids.input.text.lower() in n) or (convert_(self.root.ids.input.text.lower(),not self.rand) in n):
-				self.root.ids.meaning_reading.text = f"oops! I am looking for {isreading[self.rand].capitalize()}!"
+				self.root.ids.meaning_reading.text = f"oops! I am looking for {randdict[self.rand].capitalize()}!"
 				self.root.ids.input.text=''
 				return
 			self.root.ids.input.error_color= (225/255,0,64/255,1)
