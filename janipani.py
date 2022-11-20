@@ -6,6 +6,7 @@ from kivymd.app import MDApp
 from wanikani import *
 import pickle, random
 from kivy.core.audio import SoundLoader
+import numpy as np
 
 TEST=False
 
@@ -127,34 +128,6 @@ def sortby(text,L):
 def is_it(input, answers, indicator):
 	if indicator:
 		return input in answers	
-	# def compare(inp_word,true_word):
-	# 	mistakes=0
-	# 	dictrue,dicinp = {},{}
-	# 	for i in true_word:
-	# 		if i in dictrue: 
-	# 			dictrue[i] += 1
-	# 		else: 
-	# 			dictrue[i] = 1
-	# 	for i in inp_word:
-	# 		if i in dicinp: 
-	# 			dicinp[i] += 1
-	# 		else: 
-	# 			dicinp[i] = 1
-	# 	for i in dictrue:
-	# 		if i not in dicinp:
-	# 			if i>='0' and i<='9':
-	# 				return 10
-	# 			mistakes+=dictrue[i]
-	# 			continue
-	# 		mistakes+=abs(dictrue[i]-dicinp[i])
-	# 	for i in dicinp:
-	# 		if i not in dictrue:
-	# 			if i>='0' and i<='9':
-	# 				return 10
-	# 			mistakes+=dicinp[i]/2
-	# 			continue
-	# 		mistakes+=abs(dictrue[i]-dicinp[i])/2
-	# 	return int(mistakes)
 	for phrase in answers:
 		if distance(input,phrase)<=(1 if len(phrase)<=5 else 2 if len(phrase)<=9 else 3):
 			return True
@@ -233,28 +206,16 @@ def count_stages(lvl):
 						burn+=1
 	return str(appr),str(guru),str(master),str(enl),str(burn)
 
-# def fill_daily_hyes(obj,n=10):
-# 	if obj.daily_hyes:
-# 		return obj.daily_hyes
-# 	if (datetime.now()-CHALLENGE[1]).days>=1:
-# 		CHALLENGE[0]=0
-# 		CHALLENGE[1]=datetime.now()
-# 	hyes=[]
-# 	CHALLENGE[0]=min(CHALLENGE[0],n)
-# 	if CHALLENGE[0]<n:
-# 		for lvl in range(obj.lvl):
-# 			for j in DATA[lvl].values():
-# 				for k in j:
-# 					hyes.append(k)
-# 	n=min(len(hyes),n)
-# 	return [] if not hyes else random.sample(hyes,n)
 def getvoc(maxlvl,n):
-	hyes=[]
+	hyes = []
+	weights = []
 	for i in range(maxlvl):
 			for k in DATA[i]['voc']:
 				if k.stage>=0:
 					hyes.append(k)
-	return random.sample(hyes, n)
+					weights.append(1 if k.stage<9 else 2)
+	return random.choices(population = hyes, weights = list(np.array(weights)/len(weights)), k = n)
+	# return random.sample(hyes, n)
 
 colors={'rad':(0,163/255,245/255,1),'kan':(252/255,84/255,148/255,1),'voc':(96/255, 0, 144/255,1)}
 class MainApp(MDApp):	
@@ -1037,18 +998,16 @@ class MainApp(MDApp):
 			t=residual=0
 		else:
 			t=self.hye_info.previous_review+Delay[self.hye_info.stage]*3600-time.time()
-			residual=str(round(t//(3600)))+'h '+ str(round((t-round(t//(3600))*3600)//60))+'m'
+			if self.hye_info.stage == 9:
+				residual = '∞ h'
+			else:
+				residual = str(round(t//(3600)))+'h '+ str(round((t-round(t//(3600))*3600)//60))+'m'
 		if self.root.ids.stage_info.text==stage:
-			if self.hye_info.stage==-1:
+			if self.hye_info.stage in [-1,9]:
 				self.root.ids.stage_info.text='∞ h'
 			else:
 				self.root.ids.stage_info.text=residual
 		elif self.root.ids.stage_info.text in [residual,'∞ h']:
-			# if self.hye_info.stage==-1:
-			# 	self.root.ids.stage_info.text='not exists'
-			# else:
-			# 	t=time.time()-self.hye_info.previous_review
-			# 	self.root.ids.stage_info.text=str(round(t//(3600*24)))+'d '+ str(round((t-round(t//(3600*24))*3600*24)//3600))+'h'
 			self.root.ids.stage_info.text='lvl '+str(self.hye_info.lvl)
 		else:
 			self.root.ids.stage_info.text=stage
