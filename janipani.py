@@ -207,14 +207,23 @@ def count_stages(lvl):
 	return str(appr),str(guru),str(master),str(enl),str(burn)
 
 def getvoc(maxlvl,n):
-	hyes = []
-	weights = []
+	hyes, burned = [], []
+	weightsh, weightsb = [], []
 	for i in range(maxlvl):
 			for k in DATA[i]['voc']:
 				if k.stage>=0:
-					hyes.append(k)
-					weights.append(1 if k.stage<9 else 2)
-	return random.choices(population = hyes, weights = list(np.array(weights)/len(weights)), k = n)
+					if k.stage == 9:
+						burned.append(k)
+						weightsb.append(1.)
+					else:
+						hyes.append(k)
+						weightsh.append(1.)
+	if not burned:
+		return random.sample(hyes, n)
+	weightsh, weightsb = np.array(weightsh), np.array(weightsb)
+	weightsh /= weightsh.shape[0]*2
+	weightsb /= weightsb.shape[0]*2
+	return random.choices(population = hyes+burned, weights = list(weightsh)+list(weightsb), k = n)
 	# return random.sample(hyes, n)
 
 colors={'rad':(0,163/255,245/255,1),'kan':(252/255,84/255,148/255,1),'voc':(96/255, 0, 144/255,1)}
