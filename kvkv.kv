@@ -727,7 +727,7 @@ MDBoxLayout:
                     font_name: "meiryo"
                     font_size: 60
                     pos_hint: {"center_x": .5, "center_y": .5}
-                    text: "meaningreading here"
+                    text: "おはいよう"
                     halign: 'center'
             MDIconButton:
                 md_bg_color: app.theme_cls.primary_color
@@ -848,19 +848,60 @@ MDBoxLayout:
                     font_size: 50
                     text: "正\nし\nく\nな\nい"
 
-            MDCard:
-                id: mdcard_counter_challenge
-                padding:10
-                pos_hint: {"center_x": .88, "center_y": .9}
-                size_hint: None, None
-                size:  (root.size[0]/6,root.size[1]/12)
+            # MDCard:
+            #     id: mdcard_counter_challenge
+            #     padding:10
+            #     pos_hint: {"center_x": .88, "center_y": .9}
+            #     size_hint: None, None
+            #     size:  (root.size[0]/6,root.size[1]/12)
+            #     md_bg_color: app.theme_cls.primary_color
+            #     radius:30
+            #     opacity:0
+            #     MDLabel:
+            #         id: mdcard_counter_challenge_text
+            #         font_name: "meiryo"
+            #         font_size: 50
+            #         # pos_hint: {"center_x": .5, "center_y": .5}
+            #         text: "10"
+            #         halign: 'center'
+            #------------
+            MDIconButton:
+                id: button_challenge_swap
+                icon: "refresh"
                 md_bg_color: app.theme_cls.primary_color
-                radius:30
-                opacity:1
-                MDLabel:
-                    id: mdcard_counter_challenge_text
-                    font_name: "meiryo"
-                    font_size: 50
-                    # pos_hint: {"center_x": .5, "center_y": .5}
-                    text: "10"
-                    halign: 'center'
+                # text_color: app.theme_cls.primary_color
+                pos_hint: {"center_x": .9, "center_y": .9}
+                size_hint: None, None
+                size:  (root.size[0]/3.5,root.size[1]/4)
+                # text: "ABC"
+                # font_name: "meiryo"
+                # font_size: 70
+                on_release: app.button_challenge_swap()
+
+            MDTextField:
+                id: input_ABC
+                current_hint_text_color:app.theme_cls.primary_color
+                line_color_normal: 1, 1, 1, 1
+                text_color: 1, 1, 1, 1
+                halign: 'center'
+                font_name: "meiryo"
+                font_size: 80
+                on_text_validate: app.input_ABC()
+            # MDCard:
+            #     id: mdcard_ABC
+            #     padding:10
+            #     pos_hint: {"center_x": .5, "center_y": .7}
+            #     size_hint: None, None
+            #     size:  (root.size[0]/3,root.size[1]/7)
+            #     text:""
+            #     md_bg_color: app.theme_cls.primary_color
+            #     radius:30
+            #     opacity:1
+            #     MDLabel:
+            #         id: meaning_reading_challenge
+            #         font_name: "meiryo"
+            #         font_size: 60
+            #         pos_hint: {"center_x": .5, "center_y": .5}
+            #         text: "おはいよう"
+            #         halign: 'center'
+

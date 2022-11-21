@@ -7,6 +7,7 @@ from wanikani import *
 import pickle, random
 from kivy.core.audio import SoundLoader
 import numpy as np
+from converter import *
 
 TEST=False
 
@@ -244,6 +245,7 @@ class MainApp(MDApp):
 	hye_lesson=None
 	type_challenge=None
 	truebutton=None
+	isABC=False
 
 	def tune(self, text):
 		# return text
@@ -317,8 +319,7 @@ class MainApp(MDApp):
 			self.challenge_disable()
 			return
 		self.challenge_enable()
-		if not self.hye_challenge:
-			self.newtask()
+		self.newtask()
 		self.theme_cls.primary_palette = "Indigo"
 		self.theme_cls.primary_hue='400'
 	
@@ -1028,6 +1029,9 @@ class MainApp(MDApp):
 		self.root.ids.challenge_sound.disabled=True
 	
 	def challenge_disable(self):
+		self.root.ids.input_ABC.opacity=0
+		self.root.ids.input_ABC.disabled=True
+
 		self.root.ids.challenge_sound.opacity=0
 		self.root.ids.challenge_sound.disabled=True
 
@@ -1036,7 +1040,7 @@ class MainApp(MDApp):
 		self.root.ids.meaning_reading_challenge.font_size=40
 		self.root.ids.mdcard_meaning_reading_challenge.pos_hint['center_y']=0.5
 
-		self.root.ids.mdcard_counter_challenge.opacity=0
+		# self.root.ids.mdcard_counter_challenge.opacity=0
 
 		self.root.ids.button_challenge1.opacity=0
 		self.root.ids.button_challenge1.disabled=True
@@ -1048,7 +1052,9 @@ class MainApp(MDApp):
 		self.root.ids.button_challenge4.disabled=True
 	
 	def challenge_enable(self):
-		self.root.ids.mdcard_counter_challenge.opacity=1
+		self.root.ids.input_ABC.opacity=0
+		self.root.ids.input_ABC.disabled=True
+		# self.root.ids.mdcard_counter_challenge.opacity=1
 		self.root.ids.meaning_reading_challenge.font_size=60
 		self.root.ids.mdcard_meaning_reading_challenge.pos_hint['center_y']=.7
 
@@ -1065,7 +1071,7 @@ class MainApp(MDApp):
 	
 	def newtask(self):
 		self.hide_everything_challenge()
-		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
+		# self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
 		dice=random.randint(1,6)
 		self.type_challenge=2 if dice == 1 else 3 if dice <= 3 else 1 
 
@@ -1170,7 +1176,7 @@ class MainApp(MDApp):
 	def correct_challenge(self):
 		CHALLENGE[0]+=1
 		CHALLENGE[1]=datetime.now()
-		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
+		# self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
 		self.root.ids.correct_challenge.opacity=1
 		self.root.ids.correct_challenge1.opacity=1
 		save()
@@ -1178,17 +1184,78 @@ class MainApp(MDApp):
 	def incorrect_challenge(self):
 		CHALLENGE[0]-=1
 		CHALLENGE[1]=datetime.now()
-		self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
+		# self.root.ids.mdcard_counter_challenge_text.text=numtojap(CHALLENGE[0])
 		self.root.ids.incorrect_challenge.opacity=1
 		self.root.ids.incorrect_challenge1.opacity=1
 		save()
 		Clock.schedule_once(self.correct_challenge1, 0.8)
 		
-
+#------
 	def correct_challenge1(self,dt):
 		self.root.ids.correct_challenge.opacity=0
 		self.root.ids.correct_challenge1.opacity=0
 		self.root.ids.incorrect_challenge.opacity=0
 		self.root.ids.incorrect_challenge1.opacity=0
+		self.focusABC()
+	
+	def button_challenge_swap(self):
+		# self.press_challenge_tab()
+		if self.isABC:
+			self.isABC = False
+			self.press_challenge_tab()
+		else:
+			self.isABC = True
+			self.challenge_disable()
+			self.root.ids.meaning_reading_challenge.font_size=60
+			self.root.ids.mdcard_meaning_reading_challenge.pos_hint['center_y']=.7
+			self.get_ABC()
+			self.root.ids.input_ABC.opacity=1
+			self.root.ids.input_ABC.disabled=False
+			self.focusABC()
+	
+	def input_ABC(self):
+		# if 'correct' in self.root.ids.input_ABC.text:
+		# 	self.root.ids.input_ABC.text = ''
+		# 	self.focusABC()
+		# 	return self.focusABC()
+			
+		typ, w = self.root.ids.meaning_reading_challenge.text.split()
+		if typ == 'hiragana':
+			if hiragana.get(self.root.ids.input_ABC.text,'g')==w:
+				self.correct_challenge()
+				self.get_ABC()
+				self.root.ids.input_ABC.text=''
+				self.focusABC()
+			else:
+				self.incorrect_challenge()
+				for i in hiragana:
+					if hiragana[i]==w:
+						self.root.ids.input_ABC.text = i
+						return
+		else:
+			if katakana.get(self.root.ids.input_ABC.text,'g')==w:
+				self.correct_challenge()
+				self.get_ABC()
+				self.root.ids.input_ABC.text=''
+				self.focusABC()
+			else:
+				self.incorrect_challenge()
+				for i in katakana:
+					if katakana[i]==w:
+						self.root.ids.input_ABC.text = i
+						return
+		
+	def focusABC(self):
+		self.root.ids.input_ABC.focus = True
+
+	
+	def get_ABC(self):
+		if random.random()<0.5: #hir
+			self.root.ids.meaning_reading_challenge.text = 'hiragana '+random.sample(list(hiragana.values()),1)[0]
+		else:
+			self.root.ids.meaning_reading_challenge.text = 'katakana '+random.sample(list(katakana.values()),1)[0]
+
+		
+
 
 MainApp().run()
