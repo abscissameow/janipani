@@ -338,7 +338,7 @@ class MainApp(MDApp):
 		self.root.ids.play_lesson_button.disabled=True
 	
 	def sound_lesson(self):
-		name=self.hye_lesson.linkc
+		name=self.hye_lesson.link.replace('://','-').replace('/','_')
 		sound = SoundLoader.load('wav/'+name+'.wav')
 		sound.play()
 
@@ -500,7 +500,7 @@ class MainApp(MDApp):
 			self.rand = 0
 		
 		self.root.ids.meaning_reading.text=randdict[self.rand]
-		self.root.ids.input.focus = True
+		# self.root.ids.input.focus = True
 		self.root.ids.mdcard_review.md_bg_color=colors[self.hye_review.type]
 		self.root.ids.mdcard_review_rad.md_bg_color=colors[self.hye_review.type]
 		if not self.hye_review.hyerogliph:
@@ -523,7 +523,7 @@ class MainApp(MDApp):
 
 
 	def press_input(self):
-		self.root.ids.input.focus = True
+		# self.root.ids.input.focus = True
 		self.refresh_shield=0
 		# self.root.ids.input.helper_text=''
 		if 'nooo! not' in self.root.ids.input.text:
@@ -626,6 +626,7 @@ class MainApp(MDApp):
 				return
 			self.refresh_shield=1
 			self.root.ids.input.helper_text='   i mean ok but its like you know'
+			self.root.ids.input.focus = True
 			self.root.ids.input.error_color= (1, 233/255, 130/255, 1)
 			self.root.ids.input.text=''
 			self.root.ids.refresh_button.icon='refresh'
