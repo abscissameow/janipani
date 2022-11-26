@@ -92,9 +92,11 @@ def forecast(lvl):
 	for i in range(lvl):
 		for hyes in DATA[i].values():
 			for k in hyes:
-				if k.previous_review + Delay[k.stage]*3600 < latest:
+				x = k.previous_review + Delay[k.stage]*3600
+				nowtime = time.time()
+				if x < latest and x-nowtime>0:
 					latest = k.previous_review + Delay[k.stage]*3600
-	latest = max(0,(latest-time.time())//60)
+	latest = max(0,(latest-nowtime)//60)
 	return f"next review in {int(latest//60)}h {int(latest%60)}m"
 
 def distance(inpword,trueword,numbercheck=True):
