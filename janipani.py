@@ -627,7 +627,7 @@ class MainApp(MDApp):
 			if self.hye_review not in self.Wrongs_count:
 				return
 			self.refresh_shield=1
-			self.root.ids.input.helper_text='   i mean ok but its like you know'
+			# self.root.ids.input.helper_text='   i mean ok but its like you know'
 			self.root.ids.input.focus = True
 			self.root.ids.input.error_color= (1, 233/255, 130/255, 1)
 			self.root.ids.input.text=''
