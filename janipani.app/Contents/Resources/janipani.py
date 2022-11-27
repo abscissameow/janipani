@@ -89,14 +89,15 @@ def numtojap(n):
 
 def forecast(lvl):
 	latest=DATA[0]['rad'][0].previous_review + Delay[DATA[0]['rad'][0].stage]*3600
+	nowtime = time.time()
 	for i in range(lvl):
 		for hyes in DATA[i].values():
 			for k in hyes:
-				x = k.previous_review + Delay[k.stage]*3600
-				nowtime = time.time()
-				if x < latest and x-nowtime>0:
-					latest = k.previous_review + Delay[k.stage]*3600
-	latest = max(0,(latest-nowtime)//60)
+				reviewtime = k.previous_review + Delay[k.stage]*3600
+				if reviewtime < latest and reviewtime>nowtime:
+					latest = reviewtime
+	# latest = max(0,(latest-nowtime)//60)
+	latest = (latest-nowtime)//60
 	return f"next review in {int(latest//60)}h {int(latest%60)}m"
 
 def distance(inpword,trueword,numbercheck=True):
