@@ -97,6 +97,8 @@ def forecast(lvl):
 				if reviewtime < latest and reviewtime>nowtime:
 					latest = reviewtime
 	# latest = max(0,(latest-nowtime)//60)
+	if latest==float('inf'):
+		return "no next reviews..."
 	latest = (latest-nowtime)//60
 	return f"next review in {int(latest//60)}h {int(latest%60)}m"
 
@@ -431,7 +433,7 @@ class MainApp(MDApp):
 	
 	#----------------------------------------------------------------------------------------------
 	#----------------------------------------------------------------------------------------------
-	
+	 
 	def hide_everything_review(self):
 		self.root.ids.review_sound.opacity=0
 		self.root.ids.review_sound.disabled=True
@@ -445,6 +447,9 @@ class MainApp(MDApp):
 		self.root.ids.surrender_review_button.disabled=True
 		self.root.ids.mdcard_review.opacity=0
 		self.root.ids.mdcard_review_rad.opacity=0
+
+		# self.root.ids.rad_pic_review.opacity=0
+
 		self.root.ids.input.disabled=True
 		self.root.ids.input.opacity=0
 		self.root.ids.meaning_reading.text=''
