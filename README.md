@@ -11,7 +11,6 @@ download janipani.app
 
 -----HOW TO USE:
 
-CHECK https://t.me/janipani_updates
 
 1) learn meanings and readings of hyerogliphs in LESSONS tab (press cake button if you done with one)
 2) make review of your learned hyerogliphes in REVIEWS:\
